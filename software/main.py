@@ -117,7 +117,7 @@ def the_callback(angles, distances):
 
         # Front sector (-30 to 30 degrees)
         if abs(angle_deg) < 30 and distance < SAFE_DISTANCE:
-            print(f"front obstacle  \n angle : {angle_deg} \n distance : {distances}")
+            print(f"front obstacle  \n angle : {angle_deg} \n distance : {distance}")
             front_obstacle = True
 
         # Left sector (30 to 90 degrees)
