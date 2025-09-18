@@ -65,8 +65,8 @@ def set_steering(angle: float):
 # ==============================
 # Obstacle Avoidance Parameters
 # ==============================
-SAFE_DISTANCE = 100      # mm (0.1 meter)
-SLOW_DOWN_DISTANCE = 150  # mm (0.15 meters)
+SAFE_DISTANCE = 1      # mm (0.1 meter) (not sure of the unity ???)
+SLOW_DOWN_DISTANCE = 1.5  # mm (0.15 meters)
 TURN_ANGLE = 45            # degrees to turn when avoiding obstacles
 
 
@@ -117,7 +117,6 @@ def the_callback(angles, distances):
 
         # Front sector (-30 to 30 degrees)
         if abs(angle_deg) < 30 and distance < SAFE_DISTANCE:
-            print(f"front obstacle  \n angle : {angle_deg} \n distance : {distance}")
             front_obstacle = True
 
         # Left sector (30 to 90 degrees)
@@ -131,6 +130,7 @@ def the_callback(angles, distances):
     # Decision making
     if front_obstacle:
         set_speed(10)  # slow down
+        print(f"front obstacle  \n angle : {angle_deg} \n distance : {distance}")
         if left_clear and right_clear:
             set_steering(TURN_ANGLE)  # default right
         elif left_clear:
