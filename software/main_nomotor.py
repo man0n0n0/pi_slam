@@ -70,15 +70,6 @@ SLOW_DOWN_DISTANCE = 1.5  # (0.15 meters)
 TURN_ANGLE = 45            # degrees to turn when avoiding obstacles
 
 # ==============================
-# Visualization Setup
-# ==============================
-fig = plt.figure(figsize=(8, 8))
-ax = fig.add_subplot(111, projection='polar')
-ax.set_title("LiDAR (exit: Key 'E')", fontsize=18)
-plt.connect("key_press_event", lambda event: exit(1) if event.key == "e" else None)
-
-
-# ==============================
 # Serial Connection to LiDAR
 # ==============================
 ser = serial.Serial(
@@ -143,15 +134,6 @@ def the_callback(angles, distances):
     else:
         set_speed(0)  # move forward
         set_steering(0)
-
-    # Update visualization
-    if prevLine is not None:
-        prevLine.remove()
-    line = ax.scatter([-angle for angle in angles], distances, c="pink", s=5)
-    ax.set_theta_offset(math.pi / 2)
-    plt.pause(0.01)
-    prevLine = line
-
 
 # ==============================
 # Cleanup Function
