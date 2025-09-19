@@ -73,6 +73,7 @@ def set_steering(angle: float):
 # ==============================
 SLOW_DOWN_DISTANCE = 10  # in dm
 SAFE_DISTANCE = 2    # in dm 
+MAX_DISTANCE_LIMIT = 30 # in dm
 
 # Global variables for artifact filtering
 front_distances = []
@@ -104,8 +105,6 @@ def the_callback(angles, distances):
     # Obstacle avoidance logic
     front_obstacle_raw = False
     slow_down = False
-    # left_clear = True
-    # right_clear = True
     
     # Collect front sector distances for artifact filtering
     obstacle_front_distance = []
@@ -130,7 +129,7 @@ def the_callback(angles, distances):
                 slow_down = True
 
             # Direction determination: keep the angle of the most distant point
-            if distance > max_distance:
+            if distance > max_distance and distance < MAX_DISTANCE_LIMIT:
                 max_distance = distance
 
                 if angle <= math.pi:
@@ -143,14 +142,8 @@ def the_callback(angles, distances):
         # Not enough readings in front sector - likely artifact
         front_obstacle_raw = False
     
-    # Store current front distances for potential future use
-    front_distances = obstacle_front_distance
-    
-    # Use filtered result directly (no smoothing)
-    front_obstacle = front_obstacle_raw
-    
     # Decision making
-    if front_obstacle:
+    if front_obstacle_raw:
         print(f"front obstacle detected \n distance readings: {obstacle_front_distance} \n min distance: {min(obstacle_front_distance):.2f}m")
         set_speed(-20)  # move backward
 
