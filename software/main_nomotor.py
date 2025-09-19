@@ -73,7 +73,6 @@ def set_steering(angle: float):
 # ==============================
 SAFE_DISTANCE = 5.0      # in dm (0.1 meter) 
 SLOW_DOWN_DISTANCE = 10  # in dm (0.15 meters)
-TURN_ANGLE = 45            # degrees to turn when avoiding obstacles
 
 # ==============================
 # Serial Connection to LiDAR
@@ -126,14 +125,19 @@ def the_callback(angles, distances):
             current_front_distances.append(distance)
             if distance < SAFE_DISTANCE:
                 front_obstacle_raw = True
+
+            # Direction determination: keep the angle of the most distant point
+            if distance > max_distance:
+                max_distance = distance
+                TURN_ANGLE = math.degrees(angle_norm)
         
-        # Left sector (π/6 to π/2 radians, i.e., 30 to 90 degrees)
-        if math.pi/6 < angle_norm < math.pi/2 and distance < SAFE_DISTANCE:
-            left_clear = False
+        # # Left sector (π/6 to π/2 radians, i.e., 30 to 90 degrees)
+        # if math.pi/6 < angle_norm < math.pi/2 and distance < SAFE_DISTANCE:
+        #     left_clear = False
         
-        # Right sector (-π/2 to -π/6 radians, i.e., -90 to -30 degrees)
-        if -math.pi/2 < angle_norm < -math.pi/6 and distance < SAFE_DISTANCE:
-            right_clear = False
+        # # Right sector (-π/2 to -π/6 radians, i.e., -90 to -30 degrees)
+        # if -math.pi/2 < angle_norm < -math.pi/6 and distance < SAFE_DISTANCE:
+        #     right_clear = False
     
     # Artifact filtering for front obstacle detection
     if front_obstacle_raw and len(current_front_distances) >= MIN_READINGS_FRONT:
@@ -165,20 +169,11 @@ def the_callback(angles, distances):
     if front_obstacle:
         set_speed(0)  # slow down
         print(f"front obstacle detected \n distance readings: {len(current_front_distances)} \n min distance: {min(current_front_distances):.2f}m")
-        
-        if left_clear and right_clear:
-            set_steering(TURN_ANGLE)  # default right
-        elif left_clear:
             set_steering(TURN_ANGLE)
-        elif right_clear:
-            set_steering(-TURN_ANGLE)
-        else:
-            set_speed(0)  # reverse
-            set_steering(0)
             #time.sleep(1)
     else:
         set_speed(0)  # move forward
-        set_steering(0)
+        set_steering(TURN_ANGLE)
 
 # ==============================
 # Cleanup Function
