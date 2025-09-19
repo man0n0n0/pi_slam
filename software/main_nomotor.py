@@ -108,7 +108,7 @@ def the_callback(angles, distances):
     # right_clear = True
     
     # Collect front sector distances for artifact filtering
-    current_front_distances = []
+    obstacle_front_distance = []
     
     max_distance = 0
 
@@ -121,9 +121,9 @@ def the_callback(angles, distances):
         front_condition = (angle<= math.pi/6) or (angle >= 11*math.pi/6)
         
         if front_condition:
-            current_front_distances.append(distance)
 
             if distance < SAFE_DISTANCE:
+                obstacle_front_distance.append(distance)
                 front_obstacle_raw = True
 
             if distance < SLOW_DOWN_DISTANCE:
@@ -139,19 +139,19 @@ def the_callback(angles, distances):
                     TURN_ANGLE = math.degrees(angle - 2*math.pi)  # Convert to negative for left side
         
     # Artifact filtering for front obstacle detection
-    if front_obstacle_raw and len(current_front_distances) < MIN_READINGS_FRONT:
+    if front_obstacle_raw and len(obstacle_front_distance) < MIN_READINGS_FRONT:
         # Not enough readings in front sector - likely artifact
         front_obstacle_raw = False
     
     # Store current front distances for potential future use
-    front_distances = current_front_distances
+    front_distances = obstacle_front_distance
     
     # Use filtered result directly (no smoothing)
     front_obstacle = front_obstacle_raw
     
     # Decision making
     if front_obstacle:
-        print(f"front obstacle detected \n distance readings: {current_front_distances} \n min distance: {min(current_front_distances):.2f}m")
+        print(f"front obstacle detected \n distance readings: {obstacle_front_distance} \n min distance: {min(obstacle_front_distance):.2f}m")
         set_speed(-20)  # move backward
 
     elif slow_down:
