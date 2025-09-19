@@ -56,9 +56,15 @@ def set_steering(angle: float):
     """
     angle = max(-90, min(90, angle))  # clamp
 
-    # Convert angle to duty cycle (typically 5-10% for servos)
-    # 0 degrees at 7.5%, -90 at 5%, 90 at 10%
-    duty_cycle = 7.5 + (angle / 90) * 2.5
+    # Convert angle to pulse width (1.0ms to 2.0ms)
+    # Formula: pulse_width = 1.5ms + (angle/90) * 0.5ms
+    pulse_width_ms = 1.5 + (angle / 90.0) * 0.5
+    
+    # Convert pulse width to duty cycle percentage
+    # Duty cycle = (pulse_width / period) * 100
+    # Period = 20ms for 50Hz
+    duty_cycle = (pulse_width_ms / 20.0) * 100.0
+
     servo_pwm.ChangeDutyCycle(duty_cycle)
 
 
@@ -131,26 +137,15 @@ def the_callback(angles, distances):
     
     # Artifact filtering for front obstacle detection
     if front_obstacle_raw and len(current_front_distances) >= MIN_READINGS_FRONT:
-        # Check for consistent readings (filter out single-point artifacts)
-        min_dist = min(current_front_distances)
-        max_dist = max(current_front_distances)
-        distance_variance = max_dist - min_dist
-        
-        # Filter out if readings are too inconsistent (likely artifacts)
-        if distance_variance > MAX_DISTANCE_VARIANCE:
-            front_obstacle_raw = False
-            print(f"Artifact filtered: distance variance {distance_variance:.2f}dm too high")
-        
-        # Additional check: require multiple close readings
+
+        # require multiple close readings
         close_readings = sum(1 for d in current_front_distances if d < SAFE_DISTANCE)
         if close_readings < 2:  # Need at least 2 close readings
             front_obstacle_raw = False
-            print(f"Artifact filtered: only {close_readings} close readings")
     
     elif front_obstacle_raw and len(current_front_distances) < MIN_READINGS_FRONT:
         # Not enough readings in front sector - likely artifact
         front_obstacle_raw = False
-        print(f"Artifact filtered: insufficient front readings ({len(current_front_distances)})")
     
     # Store current front distances for potential future use
     front_distances = current_front_distances
