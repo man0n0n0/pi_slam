@@ -99,6 +99,7 @@ prevLine = None
 # Global variables for smoothing and artifact filtering
 # Global variables for artifact filtering
 front_distances = []
+max_distance = 0
 MIN_READINGS_FRONT = 3  # Minimum readings in front sector to be valid
 MAX_DISTANCE_VARIANCE = 15  # Maximum allowed variance in distance readings (decimeters)
 
