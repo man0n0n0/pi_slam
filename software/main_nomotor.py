@@ -146,7 +146,7 @@ def the_callback(angles, distances):
     # Decision making
     if front_obstacle_raw:
         print(f"front obstacle detected \n distance readings: {obstacle_front_distance} \n min distance: {min(obstacle_front_distance):.2f}m")
-        set_speed(-20)  # move backward
+        set_speed(-50)  # move backward
         time.sleep(0.1)
 
     elif slow_down:
