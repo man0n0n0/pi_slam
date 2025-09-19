@@ -165,17 +165,17 @@ def the_callback(angles, distances):
         
         if left_clear and right_clear:
             set_steering(TURN_ANGLE)  # default right
-            sleep(0.1)
+            time.sleep(0.1)
         elif left_clear:
             set_steering(TURN_ANGLE)
-            sleep(0.1)
+            time.sleep(0.1)
         elif right_clear:
             set_steering(-TURN_ANGLE)
-            sleep(0.1)
+            time.sleep(0.1)
         else:
             set_speed(0)  # reverse
             set_steering(0)
-            sleep(0.1)
+            time.sleep(0.1)
             #time.sleep(1)
     else:
         set_speed(0)  # move forward
