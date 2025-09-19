@@ -147,6 +147,7 @@ def the_callback(angles, distances):
     if front_obstacle_raw:
         print(f"front obstacle detected \n distance readings: {obstacle_front_distance} \n min distance: {min(obstacle_front_distance):.2f}m")
         set_speed(-20)  # move backward
+        time.sleep(0.1)
 
     elif slow_down:
         print(f"far front_obstacle : {TURN_ANGLE} deg")
