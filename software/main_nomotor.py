@@ -72,7 +72,7 @@ def set_steering(angle: float):
 # Obstacle Avoidance Parameters
 # ==============================
 SLOW_DOWN_DISTANCE = 10  # in dm
-SAFE_DISTANCE = 5     # in dm 
+SAFE_DISTANCE = 2    # in dm 
 
 # Global variables for artifact filtering
 front_distances = []
