@@ -75,7 +75,7 @@ SLOW_DOWN_DISTANCE = 10  # in dm
 SAFE_DISTANCE = 5    # in dm 
 
 # Global variables for artifact filtering
-front_distances = []
+FRONT_DISTANCES = []
 MIN_READINGS_FRONT = 5  # Minimum readings in front sector to be valid
 
 # ==============================
@@ -99,16 +99,16 @@ prevLine = None
 # Callback for Processing LiDAR Data
 # ==============================
 def the_callback(angles, distances):
-    global prevLine, front_distances
+    global prevLine, FRONT_DISTANCES
     
     # Obstacle avoidance logic
     front_obstacle_raw = False
     slow_down = False
     
     # Collect front sector distances for artifact filtering
-    obstacle_front_distance = []
+    FRONT_DISTANCES = []
     
-    max_distance = 0
+    MAX_DISTANCE = 0
     TURN_ANGLE = 0
 
     # Check for obstacles
@@ -122,24 +122,26 @@ def the_callback(angles, distances):
         if front_condition:
 
             if distance < SAFE_DISTANCE:
-                obstacle_front_distance.append(distance)
+                FRONT_DISTANCES.append(distance)
                 front_obstacle_raw = True
 
+            # value for 
             if distance < SLOW_DOWN_DISTANCE:
                 slow_down = True
 
+            # Speed is distance dependant 
+
             # Direction determination: keep the angle of the most distant point
-            if distance > max_distance :
-                max_distance = distance
+            if distance > MAX_DISTANCE :
+                MAX_DISTANCE = distance
                 if angle <= math.pi:
                     current_angle = math.degrees(angle)
                 else:
                     current_angle = math.degrees(angle - 2*math.pi)  # Convert to negative for left side
-               
                 TURN_ANGLE = (TURN_ANGLE + current_angle) / 2 # mean function to smooth
 
     # Artifact filtering for front obstacle detection
-    if front_obstacle_raw and len(obstacle_front_distance) < MIN_READINGS_FRONT:
+    if front_obstacle_raw and len(FRONT_DISTANCES) < MIN_READINGS_FRONT:
         # Not enough readings in front sector - likely artifact
         front_obstacle_raw = False
     
@@ -148,15 +150,15 @@ def the_callback(angles, distances):
         #set_speed(-30)  # move backward
         set_speed(0)  # move backward
         set_steering(TURN_ANGLE)
-        
+
     elif slow_down:
         #print(f"far front_obstacle : {TURN_ANGLE} deg")
-        set_speed(10)  # move forward
+        set_speed(0)  # move forward
         set_steering(TURN_ANGLE)
 
     else:
         #print(f"NO obstacle detected : {TURN_ANGLE} deg")
-        set_speed(20)  # move forward
+        set_speed(0)  # move forward
         set_steering(TURN_ANGLE)
 
 # ==============================
