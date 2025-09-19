@@ -177,7 +177,7 @@ def the_callback(angles, distances):
             set_steering(0)
             #time.sleep(1)
     else:
-        set_speed(20)  # move forward
+        set_speed(0)  # move forward
         set_steering(0)
 
 # ==============================
