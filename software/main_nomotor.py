@@ -141,20 +141,10 @@ def the_callback(angles, distances):
                 else:
                     TURN_ANGLE = math.degrees(angle - 2*math.pi)  # Convert to negative for left side
         
-    # # Artifact filtering for front obstacle detection
-    # if front_obstacle_raw and len(current_front_distances) >= MIN_READINGS_FRONT:
-    #     # Check for consistent readings (filter out single-point artifacts)
-    #     min_dist = min(current_front_distances)
-    #     max_dist = max(current_front_distances)
-    #     distance_variance = max_dist - min_dist
-        
-    #     # Filter out if readings are too inconsistent (likely artifacts)
-    #     if distance_variance > MAX_DISTANCE_VARIANCE:
-    #         front_obstacle_raw = False
-    
-    # elif front_obstacle_raw and len(current_front_distances) < MIN_READINGS_FRONT:
-    #     # Not enough readings in front sector - likely artifact
-    #     front_obstacle_raw = False
+    # Artifact filtering for front obstacle detection
+    if front_obstacle_raw and len(current_front_distances) < MIN_READINGS_FRONT:
+        # Not enough readings in front sector - likely artifact
+        front_obstacle_raw = False
     
     # Store current front distances for potential future use
     front_distances = current_front_distances
