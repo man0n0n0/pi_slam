@@ -65,8 +65,8 @@ def set_steering(angle: float):
 # ==============================
 # Obstacle Avoidance Parameters
 # ==============================
-SAFE_DISTANCE = 1      # (0.1 meter) (not sure of the unity ???)
-SLOW_DOWN_DISTANCE = 1.5  # (0.15 meters)
+SAFE_DISTANCE = 10      # in cm (0.1 meter) 
+SLOW_DOWN_DISTANCE = 15  # in cm (0.15 meters)
 TURN_ANGLE = 45            # degrees to turn when avoiding obstacles
 
 # ==============================
@@ -91,36 +91,51 @@ prevLine = None
 # ==============================
 # Callback for Processing LiDAR Data
 # ==============================
-def the_callback(angles, distances):
-    global prevLine
+# Global variables for smoothing
+obstacle_history = []
+HISTORY_SIZE = 5  # Number of recent readings to consider
+OBSTACLE_THRESHOLD = 0.6  # 60% of readings must detect obstacle
 
+def the_callback(angles, distances):
+    global prevLine, obstacle_history
+    
     # Obstacle avoidance logic
-    front_obstacle = False
+    front_obstacle_raw = False
     left_clear = True
     right_clear = True
-
+    
     # Check for obstacles
     for angle, distance in zip(angles, distances):
         angle_deg = math.degrees(angle) % 360
         if angle_deg > 180:
             angle_deg -= 360
-
+        
         # Front sector (-30 to 30 degrees)
         if abs(angle_deg) < 30 and distance < SAFE_DISTANCE:
-            front_obstacle = True
-
+            front_obstacle_raw = True
+        
         # Left sector (30 to 90 degrees)
         if 30 < angle_deg < 90 and distance < SAFE_DISTANCE:
             left_clear = False
-
+        
         # Right sector (-90 to -30 degrees)
         if -90 < angle_deg < -30 and distance < SAFE_DISTANCE:
             right_clear = False
-
+    
+    # Add current reading to history and maintain size
+    obstacle_history.append(front_obstacle_raw)
+    if len(obstacle_history) > HISTORY_SIZE:
+        obstacle_history.pop(0)
+    
+    # Apply smoothing filter - obstacle confirmed if threshold percentage of recent readings detect it
+    obstacle_ratio = sum(obstacle_history) / len(obstacle_history)
+    front_obstacle = obstacle_ratio >= OBSTACLE_THRESHOLD
+    
     # Decision making
     if front_obstacle:
         set_speed(0)  # slow down
-        print(f"front obstacle  \n angle : {angle_deg} \n distance : {distance}")
+        print(f"front obstacle (smoothed: {obstacle_ratio:.2f}) \n angle : {angle_deg} \n distance : {distance}")
+        
         if left_clear and right_clear:
             set_steering(TURN_ANGLE)  # default right
         elif left_clear:
