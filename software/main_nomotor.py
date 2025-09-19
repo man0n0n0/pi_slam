@@ -65,8 +65,8 @@ def set_steering(angle: float):
 # ==============================
 # Obstacle Avoidance Parameters
 # ==============================
-SAFE_DISTANCE = 10      # in cm (0.1 meter) 
-SLOW_DOWN_DISTANCE = 15  # in cm (0.15 meters)
+SAFE_DISTANCE = 0.10      # in m (0.1 meter) 
+SLOW_DOWN_DISTANCE = 0.15  # in m (0.15 meters)
 TURN_ANGLE = 45            # degrees to turn when avoiding obstacles
 
 # ==============================
@@ -195,7 +195,7 @@ try:
                     first = angles[: split[0] + 1]
                     firstDist = distances[: split[0] + 1]
                     angles = angles[split[0] + 1 :]
-                    distances = distances[split[0] + 1 :]
+                    distances = distances[split[0] + 1 :]/10
                     the_callback(first, firstDist)
 
                 tmpString = ""
