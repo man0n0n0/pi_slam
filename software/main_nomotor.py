@@ -65,8 +65,8 @@ def set_steering(angle: float):
 # ==============================
 # Obstacle Avoidance Parameters
 # ==============================
-SAFE_DISTANCE = 1.0      # in dm (0.1 meter) 
-SLOW_DOWN_DISTANCE = 1.5  # in dm (0.15 meters)
+SAFE_DISTANCE = 2.0      # in dm (0.1 meter) 
+SLOW_DOWN_DISTANCE = 2.5  # in dm (0.15 meters)
 TURN_ANGLE = 45            # degrees to turn when avoiding obstacles
 
 # ==============================
@@ -95,7 +95,7 @@ prevLine = None
 # Global variables for artifact filtering
 front_distances = []
 MIN_READINGS_FRONT = 3  # Minimum readings in front sector to be valid
-MAX_DISTANCE_VARIANCE = 0.5  # Maximum allowed variance in distance readings (meters)
+MAX_DISTANCE_VARIANCE = 5  # Maximum allowed variance in distance readings (decimeters)
 
 def the_callback(angles, distances):
     global prevLine, front_distances
