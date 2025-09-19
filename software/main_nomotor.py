@@ -71,9 +71,8 @@ def set_steering(angle: float):
 # ==============================
 # Obstacle Avoidance Parameters
 # ==============================
-SLOW_DOWN_DISTANCE = 10  # in dm
+SLOW_DOWN_DISTANCE = 5  # in dm
 SAFE_DISTANCE = 2    # in dm 
-MAX_DISTANCE_LIMIT = 30 # in dm
 
 # Global variables for artifact filtering
 front_distances = []
@@ -129,14 +128,17 @@ def the_callback(angles, distances):
                 slow_down = True
 
             # Direction determination: keep the angle of the most distant point
-            if distance > max_distance and distance < MAX_DISTANCE_LIMIT:
+            if distance > max_distance :
                 max_distance = distance
-
                 if angle <= math.pi:
-                    TURN_ANGLE = math.degrees(angle)
+                    current_distance_angle = math.degrees(angle)
                 else:
-                    TURN_ANGLE = math.degrees(angle - 2*math.pi)  # Convert to negative for left side
-        
+                    current_angle = math.degrees(angle - 2*math.pi)  # Convert to negative for left side
+               
+                farest_distance_angle = (farest_distance_angle + current_angle) / 2 # mean function to smooth
+
+    farest_distance_angle = TURN_ANGLE # one servo actualisation pwm per serial package
+
     # Artifact filtering for front obstacle detection
     if front_obstacle_raw and len(obstacle_front_distance) < MIN_READINGS_FRONT:
         # Not enough readings in front sector - likely artifact
@@ -148,12 +150,12 @@ def the_callback(angles, distances):
         set_speed(-20)  # move backward
 
     elif slow_down:
-        print(f"far front_obstacle : slowing down to {TURN_ANGLE} deg")
+        print(f"far front_obstacle : {TURN_ANGLE} deg")
         set_speed(0)  # move forward
         set_steering(TURN_ANGLE)
 
     else:
-        print(f"no obstacle detected : turning to {TURN_ANGLE} deg")
+        print(f"NO obstacle detected : {TURN_ANGLE} deg")
         set_speed(0)  # move forward
         set_steering(TURN_ANGLE)
 
