@@ -131,7 +131,8 @@ def the_callback(angles, distances):
             if distance > max_distance:
                 max_distance = distance
                 TURN_ANGLE = math.degrees(angle_norm)
-                print(TURN_ANGLE)
+
+        print(TURN_ANGLE)
         
         # # Left sector (π/6 to π/2 radians, i.e., 30 to 90 degrees)
         # if math.pi/6 < angle_norm < math.pi/2 and distance < SAFE_DISTANCE:
