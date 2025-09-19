@@ -54,7 +54,7 @@ def set_steering(angle: float):
     Set steering angle using servo motor.
     :param angle: -90 (full left) to 90 (full right)
     """
-    angle = max(-45, min(45, angle))  # clamp
+    angle = max(-45, min(45, angle)) * -1 # clamp and revert
 
     # Convert angle to pulse width (1.0ms to 2.0ms)
     # Formula: pulse_width = 1.5ms + (angle/90) * 0.5ms
@@ -137,10 +137,9 @@ def the_callback(angles, distances):
                 max_distance = distance
 
                 if angle <= math.pi:
-                    TURN_ANGLE = math.degrees(angle - 2*math.pi)  # Convert to negative for left side
-
-                else:
                     TURN_ANGLE = math.degrees(angle)
+                else:
+                    TURN_ANGLE = math.degrees(angle - 2*math.pi)  # Convert to negative for left side
         
     # Artifact filtering for front obstacle detection
     if front_obstacle_raw and len(current_front_distances) >= MIN_READINGS_FRONT:
