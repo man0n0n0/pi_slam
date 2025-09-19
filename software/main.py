@@ -145,11 +145,12 @@ def the_callback(angles, distances):
     
     # Decision making
     if front_obstacle_raw:
-        set_speed(-30)  # move backward
+        #set_speed(-30)  # move backward
+        set_speed(0)  # move backward
 
     elif slow_down:
         #print(f"far front_obstacle : {TURN_ANGLE} deg")
-        set_speed(5)  # move forward
+        set_speed(10)  # move forward
         set_steering(TURN_ANGLE)
 
     else:
