@@ -72,7 +72,7 @@ def set_steering(angle: float):
 # Obstacle Avoidance Parameters
 # ==============================
 SLOW_DOWN_DISTANCE = 10  # in dm
-SAFE_DISTANCE = 0.5     # in dm 
+SAFE_DISTANCE = 5     # in dm 
 
 # Global variables for artifact filtering
 front_distances = []
@@ -135,16 +135,9 @@ def the_callback(angles, distances):
             # Direction determination: keep the angle of the most distant point
             if distance > max_distance:
                 max_distance = distance
+                print(angle_norm)
                 TURN_ANGLE = math.degrees(angle_norm)
         
-        # # Left sector (π/6 to π/2 radians, i.e., 30 to 90 degrees)
-        # if math.pi/6 < angle_norm < math.pi/2 and distance < SAFE_DISTANCE:
-        #     left_clear = False
-        
-        # # Right sector (-π/2 to -π/6 radians, i.e., -90 to -30 degrees)
-        # if -math.pi/2 < angle_norm < -math.pi/6 and distance < SAFE_DISTANCE:
-        #     right_clear = False
-    
     # Artifact filtering for front obstacle detection
     if front_obstacle_raw and len(current_front_distances) >= MIN_READINGS_FRONT:
         # Check for consistent readings (filter out single-point artifacts)
@@ -169,7 +162,7 @@ def the_callback(angles, distances):
     # Decision making
     if front_obstacle:
         print(f"front obstacle detected \n distance readings: {len(current_front_distances)} \n min distance: {min(current_front_distances):.2f}m")
-        set_speed(0)  # move backward
+        set_speed(-20)  # move backward
         set_steering(TURN_ANGLE*-1) #turn the wheels the opposite side 
         time.sleep(1)
 
