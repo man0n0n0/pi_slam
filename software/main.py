@@ -54,29 +54,29 @@ def set_steering(angle: float):
     Set steering angle using servo motor.
     :param angle: -90 (full left) to 90 (full right)
     """
-    angle = max(-90, min(90, angle))  # clamp
+    angle = max(-45, min(45, angle)) * -1 # clamp and revert
 
-    # Convert angle to duty cycle (typically 5-10% for servos)
-    # 0 degrees at 7.5%, -90 at 5%, 90 at 10%
-    duty_cycle = 7.5 + (angle / 90) * 2.5
+    # Convert angle to pulse width (1.0ms to 2.0ms)
+    # Formula: pulse_width = 1.5ms + (angle/90) * 0.5ms
+    pulse_width_ms = 1.5 + (angle / 45.0) * 0.5
+    
+    # Convert pulse width to duty cycle percentage
+    # Duty cycle = (pulse_width / period) * 100
+    # Period = 20ms for 50Hz
+    duty_cycle = (pulse_width_ms / 20.0) * 100.0
+
     servo_pwm.ChangeDutyCycle(duty_cycle)
 
 
 # ==============================
 # Obstacle Avoidance Parameters
 # ==============================
-SAFE_DISTANCE = 1      # (0.1 meter) (not sure of the unity ???)
-SLOW_DOWN_DISTANCE = 1.5  # (0.15 meters)
-TURN_ANGLE = 45            # degrees to turn when avoiding obstacles
+SLOW_DOWN_DISTANCE = 10  # in dm
+SAFE_DISTANCE = 5    # in dm 
 
-# ==============================
-# Visualization Setup
-# ==============================
-fig = plt.figure(figsize=(8, 8))
-ax = fig.add_subplot(111, projection='polar')
-ax.set_title("LiDAR (exit: Key 'E')", fontsize=18)
-plt.connect("key_press_event", lambda event: exit(1) if event.key == "e" else None)
-
+# Global variables for artifact filtering
+front_distances = []
+MIN_READINGS_FRONT = 5  # Minimum readings in front sector to be valid
 
 # ==============================
 # Serial Connection to LiDAR
@@ -90,68 +90,72 @@ ser = serial.Serial(
     stopbits=1,
 )
 
-
 tmpString = ""
 angles = []
 distances = []
 prevLine = None
 
-
 # ==============================
 # Callback for Processing LiDAR Data
 # ==============================
 def the_callback(angles, distances):
-    global prevLine
-
+    global prevLine, front_distances
+    
     # Obstacle avoidance logic
-    front_obstacle = False
-    left_clear = True
-    right_clear = True
+    front_obstacle_raw = False
+    slow_down = False
+    
+    # Collect front sector distances for artifact filtering
+    obstacle_front_distance = []
+    
+    max_distance = 0
+    TURN_ANGLE = 0
 
     # Check for obstacles
     for angle, distance in zip(angles, distances):
-        angle_deg = math.degrees(angle) % 360
-        if angle_deg > 180:
-            angle_deg -= 360
+            
+        # Front sector: 0° ± 30° (considering wraparound)
+        # This covers [330°-360°] and [0°-30°] in degrees
+        # Or [11π/6 - 2π] and [0 - π/6] in radians
+        front_condition = (angle<= math.pi/6) or (angle >= 11*math.pi/6)
+        
+        if front_condition:
 
-        # Front sector (-30 to 30 degrees)
-        if abs(angle_deg) < 30 and distance < SAFE_DISTANCE:
-            front_obstacle = True
+            if distance < SAFE_DISTANCE:
+                obstacle_front_distance.append(distance)
+                front_obstacle_raw = True
 
-        # Left sector (30 to 90 degrees)
-        if 30 < angle_deg < 90 and distance < SAFE_DISTANCE:
-            left_clear = False
+            if distance < SLOW_DOWN_DISTANCE:
+                slow_down = True
 
-        # Right sector (-90 to -30 degrees)
-        if -90 < angle_deg < -30 and distance < SAFE_DISTANCE:
-            right_clear = False
+            # Direction determination: keep the angle of the most distant point
+            if distance > max_distance :
+                max_distance = distance
+                if angle <= math.pi:
+                    current_angle = math.degrees(angle)
+                else:
+                    current_angle = math.degrees(angle - 2*math.pi)  # Convert to negative for left side
+               
+                TURN_ANGLE = (TURN_ANGLE + current_angle) / 2 # mean function to smooth
 
+    # Artifact filtering for front obstacle detection
+    if front_obstacle_raw and len(obstacle_front_distance) < MIN_READINGS_FRONT:
+        # Not enough readings in front sector - likely artifact
+        front_obstacle_raw = False
+    
     # Decision making
-    if front_obstacle:
-        set_speed(10)  # slow down
-        #print(f"front obstacle  \n angle : {angle_deg} \n distance : {distance}")
-        if left_clear and right_clear:
-            set_steering(TURN_ANGLE)  # default right
-        elif left_clear:
-            set_steering(TURN_ANGLE)
-        elif right_clear:
-            set_steering(-TURN_ANGLE)
-        else:
-            set_speed(-10)  # reverse
-            set_steering(0)
-            time.sleep(1)
+    if front_obstacle_raw:
+        set_speed(-30)  # move backward
+
+    elif slow_down:
+        #print(f"far front_obstacle : {TURN_ANGLE} deg")
+        set_speed(15)  # move forward
+        set_steering(TURN_ANGLE)
+
     else:
-        set_speed(10)  # move forward
-        set_steering(0)
-
-    # Update visualization
-    if prevLine is not None:
-        prevLine.remove()
-    line = ax.scatter([-angle for angle in angles], distances, c="pink", s=5)
-    ax.set_theta_offset(math.pi / 2)
-    plt.pause(0.01)
-    prevLine = line
-
+        #print(f"NO obstacle detected : {TURN_ANGLE} deg")
+        set_speed(30)  # move forward
+        set_steering(TURN_ANGLE)
 
 # ==============================
 # Cleanup Function
