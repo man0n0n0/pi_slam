@@ -104,7 +104,7 @@ MIN_READINGS_FRONT = 3  # Minimum readings in front sector to be valid
 MAX_DISTANCE_VARIANCE = 15  # Maximum allowed variance in distance readings (decimeters)
 
 def the_callback(angles, distances):
-    global prevLine, front_distances
+    global prevLine, front_distances, max_distance
     
     # Obstacle avoidance logic
     front_obstacle_raw = False
