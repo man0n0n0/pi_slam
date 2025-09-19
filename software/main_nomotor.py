@@ -121,11 +121,15 @@ def the_callback(angles, distances):
         if angle_norm > math.pi:
             angle_norm -= 2 * math.pi
         
-        # Front sector ( pi / 3 i.e., -60 to 60 degrees)
-        if abs(angle_norm) < math.pi/3:
+        # Front sector ( pi / 6 i.e., -30 to 30 degrees)
+        if abs(angle_norm) < math.pi/6:
             current_front_distances.append(distance)
+
             if distance < SAFE_DISTANCE:
                 front_obstacle_raw = True
+
+            if distance < SLOW_DOWN_DISTANCE:
+                slow_down = True
 
             # Direction determination: keep the angle of the most distant point
             if distance > max_distance:
@@ -164,9 +168,15 @@ def the_callback(angles, distances):
     # Decision making
     if front_obstacle:
         print(f"front obstacle detected \n distance readings: {len(current_front_distances)} \n min distance: {min(current_front_distances):.2f}m")
-        set_speed(0)  # slow down
+        set_speed(0)  # move backward
+        set_steering(TURN_ANGLE*-1) #turn the wheels the opposite side 
+        time.sleep(1)
+
+    elif slow_down:
+        print(f"far front_obstacle : slowing down to {TURN_ANGLE} deg")
+        set_speed(0)  # move forward
         set_steering(TURN_ANGLE)
-        #time.sleep(1)
+
     else:
         print(f"no obstacle detected : turning to {TURN_ANGLE} deg")
         set_speed(0)  # move forward
