@@ -90,12 +90,10 @@ ser = serial.Serial(
     stopbits=1,
 )
 
-
 tmpString = ""
 angles = []
 distances = []
 prevLine = None
-
 
 # ==============================
 # Callback for Processing LiDAR Data
@@ -153,7 +151,7 @@ def the_callback(angles, distances):
     
     # Decision making
     if front_obstacle:
-        print(f"front obstacle detected \n distance readings: {len(current_front_distances)} \n min distance: {min(current_front_distances):.2f}m")
+        print(f"front obstacle detected \n distance readings: {current_front_distances} \n min distance: {min(current_front_distances):.2f}m")
         set_speed(-20)  # move backward
 
     elif slow_down:
