@@ -137,8 +137,16 @@ def the_callback(angles, distances):
     
     # Artifact filtering for front obstacle detection
     if front_obstacle_raw and len(current_front_distances) >= MIN_READINGS_FRONT:
+        # Check for consistent readings (filter out single-point artifacts)
+        min_dist = min(current_front_distances)
+        max_dist = max(current_front_distances)
+        distance_variance = max_dist - min_dist
+        
+        # Filter out if readings are too inconsistent (likely artifacts)
+        if distance_variance > MAX_DISTANCE_VARIANCE:
+            front_obstacle_raw = False
 
-        # require multiple close readings
+        # Additional check: require multiple close readings
         close_readings = sum(1 for d in current_front_distances if d < SAFE_DISTANCE)
         if close_readings < 2:  # Need at least 2 close readings
             front_obstacle_raw = False
