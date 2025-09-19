@@ -44,13 +44,9 @@ def set_speed(speed_percent: float):
     duty_cycle = 7.5 + (speed_percent / 100) * 2.5
     esc_pwm.ChangeDutyCycle(duty_cycle)
 
-
-    # Send minimum throttle
-esc_pwm.ChangeDutyCycle(5.0)
-time.sleep(2)
-
-    # Move to neutral
-esc_pwm.ChangeDutyCycle(7.5)
-time.sleep(2)
+for v in range (0,100):
+    print(v)
+    set_speed(v)
+    time.sleep(0.1)
 
 
