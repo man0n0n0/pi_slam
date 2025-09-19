@@ -54,11 +54,11 @@ def set_steering(angle: float):
     Set steering angle using servo motor.
     :param angle: -90 (full left) to 90 (full right)
     """
-    angle = max(-90, min(90, angle))  # clamp
+    angle = max(-45, min(45, angle))  # clamp
 
     # Convert angle to pulse width (1.0ms to 2.0ms)
     # Formula: pulse_width = 1.5ms + (angle/90) * 0.5ms
-    pulse_width_ms = 1.5 + (angle / 90.0) * 0.5
+    pulse_width_ms = 1.5 + (angle / 45.0) * 0.5
     
     # Convert pulse width to duty cycle percentage
     # Duty cycle = (pulse_width / period) * 100
@@ -136,7 +136,7 @@ def the_callback(angles, distances):
             if distance > max_distance:
                 max_distance = distance
 
-                if angle<= math.pi:
+                if angle <= math.pi:
                     TURN_ANGLE = math.degrees(angle)
                 else:
                     TURN_ANGLE = math.degrees(angle - 2*math.pi)  # Convert to negative for left side
@@ -166,8 +166,6 @@ def the_callback(angles, distances):
     if front_obstacle:
         print(f"front obstacle detected \n distance readings: {len(current_front_distances)} \n min distance: {min(current_front_distances):.2f}m")
         set_speed(-20)  # move backward
-        set_steering(TURN_ANGLE*-1) #turn the wheels the opposite side 
-        time.sleep(1)
 
     elif slow_down:
         print(f"far front_obstacle : slowing down to {TURN_ANGLE} deg")
