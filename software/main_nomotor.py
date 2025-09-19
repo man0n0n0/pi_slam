@@ -117,9 +117,13 @@ def the_callback(angles, distances):
 
     # Check for obstacles
     for angle, distance in zip(angles, distances):
+            
+        # Front sector: 0° ± 30° (considering wraparound)
+        # This covers [330°-360°] and [0°-30°] in degrees
+        # Or [11π/6 - 2π] and [0 - π/6] in radians
+        front_condition = (angle_norm <= math.pi/6) or (angle_norm >= 11*math.pi/6)
         
-        # Front sector ( pi / 6 i.e., -30 to 30 degrees)
-        if abs(angle) < math.pi/6:
+        if front_condition:
             current_front_distances.append(distance)
 
             if distance < SAFE_DISTANCE:
