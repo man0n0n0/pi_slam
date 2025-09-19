@@ -137,9 +137,10 @@ def the_callback(angles, distances):
                 max_distance = distance
 
                 if angle <= math.pi:
-                    TURN_ANGLE = math.degrees(angle)
-                else:
                     TURN_ANGLE = math.degrees(angle - 2*math.pi)  # Convert to negative for left side
+
+                else:
+                    TURN_ANGLE = math.degrees(angle)
         
     # Artifact filtering for front obstacle detection
     if front_obstacle_raw and len(current_front_distances) >= MIN_READINGS_FRONT:
