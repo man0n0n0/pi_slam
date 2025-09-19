@@ -147,7 +147,8 @@ def the_callback(angles, distances):
     if front_obstacle_raw:
         #set_speed(-30)  # move backward
         set_speed(0)  # move backward
-
+        set_steering(TURN_ANGLE)
+        
     elif slow_down:
         #print(f"far front_obstacle : {TURN_ANGLE} deg")
         set_speed(10)  # move forward
