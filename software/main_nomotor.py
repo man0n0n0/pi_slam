@@ -109,6 +109,7 @@ def the_callback(angles, distances):
     obstacle_front_distance = []
     
     max_distance = 0
+    farest_distance_angle = 0
 
     # Check for obstacles
     for angle, distance in zip(angles, distances):
