@@ -71,8 +71,13 @@ def set_steering(angle: float):
 # ==============================
 # Obstacle Avoidance Parameters
 # ==============================
-SAFE_DISTANCE = 5.0      # in dm (0.1 meter) 
-SLOW_DOWN_DISTANCE = 10  # in dm (0.15 meters)
+SAFE_DISTANCE = 10     # in dm 
+SLOW_DOWN_DISTANCE = 50  # in dm
+
+# Global variables for artifact filtering
+front_distances = []
+MIN_READINGS_FRONT = 3  # Minimum readings in front sector to be valid
+MAX_DISTANCE_VARIANCE = 50  # Maximum allowed variance in distance readings (decimeters)
 
 # ==============================
 # Serial Connection to LiDAR
@@ -96,12 +101,6 @@ prevLine = None
 # ==============================
 # Callback for Processing LiDAR Data
 # ==============================
-# Global variables for smoothing and artifact filtering
-# Global variables for artifact filtering
-front_distances = []
-MIN_READINGS_FRONT = 3  # Minimum readings in front sector to be valid
-MAX_DISTANCE_VARIANCE = 15  # Maximum allowed variance in distance readings (decimeters)
-
 def the_callback(angles, distances):
     global prevLine, front_distances
     
@@ -122,8 +121,8 @@ def the_callback(angles, distances):
         if angle_norm > math.pi:
             angle_norm -= 2 * math.pi
         
-        # Front sector (-π/6 to π/6 radians, i.e., -30 to 30 degrees)
-        if abs(angle_norm) < math.pi/6:
+        # Front sector ( pi / 3 i.e., -60 to 60 degrees)
+        if abs(angle_norm) < math.pi/3:
             current_front_distances.append(distance)
             if distance < SAFE_DISTANCE:
                 front_obstacle_raw = True
@@ -151,11 +150,6 @@ def the_callback(angles, distances):
         # Filter out if readings are too inconsistent (likely artifacts)
         if distance_variance > MAX_DISTANCE_VARIANCE:
             front_obstacle_raw = False
-
-        # # Additional check: require multiple close readings
-        # close_readings = sum(1 for d in current_front_distances if d < SAFE_DISTANCE)
-        # if close_readings < 2:  # Need at least 2 close readings
-        #     front_obstacle_raw = False
     
     elif front_obstacle_raw and len(current_front_distances) < MIN_READINGS_FRONT:
         # Not enough readings in front sector - likely artifact
