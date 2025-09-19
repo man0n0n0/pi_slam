@@ -45,9 +45,16 @@ def set_speed(speed_percent: float):
     duty_cycle = 7.5 + (speed_percent / 100) * 2.5
     esc_pwm.ChangeDutyCycle(duty_cycle)
 
-for v in range (0,50):
+    
+# =============================================
+for v in range (0,-50,-1):
     print(v)
     set_speed(v)
     time.sleep(0.2)
+
+# for v in range (0,50):
+#     print(v)
+#     set_speed(v)
+#     time.sleep(0.2)
 
 
