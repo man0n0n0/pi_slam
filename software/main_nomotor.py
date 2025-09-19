@@ -106,8 +106,9 @@ def the_callback(angles, distances):
     
     # Obstacle avoidance logic
     front_obstacle_raw = False
-    left_clear = True
-    right_clear = True
+    slow_down = False
+    # left_clear = True
+    # right_clear = True
     
     # Collect front sector distances for artifact filtering
     current_front_distances = []
