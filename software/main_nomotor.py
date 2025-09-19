@@ -121,7 +121,7 @@ def the_callback(angles, distances):
         # Front sector: 0° ± 30° (considering wraparound)
         # This covers [330°-360°] and [0°-30°] in degrees
         # Or [11π/6 - 2π] and [0 - π/6] in radians
-        front_condition = (angle_norm <= math.pi/6) or (angle_norm >= 11*math.pi/6)
+        front_condition = (angle<= math.pi/6) or (angle >= 11*math.pi/6)
         
         if front_condition:
             current_front_distances.append(distance)
