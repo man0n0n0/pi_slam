@@ -146,10 +146,10 @@ def the_callback(angles, distances):
         if distance_variance > MAX_DISTANCE_VARIANCE:
             front_obstacle_raw = False
 
-        # Additional check: require multiple close readings
-        close_readings = sum(1 for d in current_front_distances if d < SAFE_DISTANCE)
-        if close_readings < 2:  # Need at least 2 close readings
-            front_obstacle_raw = False
+        # # Additional check: require multiple close readings
+        # close_readings = sum(1 for d in current_front_distances if d < SAFE_DISTANCE)
+        # if close_readings < 2:  # Need at least 2 close readings
+        #     front_obstacle_raw = False
     
     elif front_obstacle_raw and len(current_front_distances) < MIN_READINGS_FRONT:
         # Not enough readings in front sector - likely artifact
@@ -177,7 +177,7 @@ def the_callback(angles, distances):
             set_steering(0)
             #time.sleep(1)
     else:
-        set_speed(10)  # move forward
+        set_speed(20)  # move forward
         set_steering(0)
 
 # ==============================
