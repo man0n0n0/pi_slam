@@ -106,20 +106,21 @@ def the_callback(angles, distances):
     
     # Check for obstacles
     for angle, distance in zip(angles, distances):
-        angle_deg = math.degrees(angle) % 360
-        if angle_deg > 180:
-            angle_deg -= 360
+        # Normalize angle to [-π, π] range
+        angle_norm = angle % (2 * math.pi)
+        if angle_norm > math.pi:
+            angle_norm -= 2 * math.pi
         
-        # Front sector (-30 to 30 degrees)
-        if abs(angle_deg) < 30 and distance < SAFE_DISTANCE:
+        # Front sector (-π/6 to π/6 radians, i.e., -30 to 30 degrees)
+        if abs(angle_norm) < math.pi/6 and distance < SAFE_DISTANCE:
             front_obstacle_raw = True
         
-        # Left sector (30 to 90 degrees)
-        if 30 < angle_deg < 90 and distance < SAFE_DISTANCE:
+        # Left sector (π/6 to π/2 radians, i.e., 30 to 90 degrees)
+        if math.pi/6 < angle_norm < math.pi/2 and distance < SAFE_DISTANCE:
             left_clear = False
         
-        # Right sector (-90 to -30 degrees)
-        if -90 < angle_deg < -30 and distance < SAFE_DISTANCE:
+        # Right sector (-π/2 to -π/6 radians, i.e., -90 to -30 degrees)
+        if -math.pi/2 < angle_norm < -math.pi/6 and distance < SAFE_DISTANCE:
             right_clear = False
     
     # Add current reading to history and maintain size
@@ -134,7 +135,7 @@ def the_callback(angles, distances):
     # Decision making
     if front_obstacle:
         set_speed(0)  # slow down
-        print(f"front obstacle (smoothed: {obstacle_ratio:.2f}) \n angle : {angle_deg} \n distance : {distance}")
+        print(f"front obstacle (smoothed: {obstacle_ratio:.2f}) \n angle : {angle_norm:.3f} rad \n distance : {distance}")
         
         if left_clear and right_clear:
             set_steering(TURN_ANGLE)  # default right
