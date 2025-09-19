@@ -65,8 +65,8 @@ def set_steering(angle: float):
 # ==============================
 # Obstacle Avoidance Parameters
 # ==============================
-SAFE_DISTANCE = 2.0      # in dm (0.1 meter) 
-SLOW_DOWN_DISTANCE = 2.5  # in dm (0.15 meters)
+SAFE_DISTANCE = 5.0      # in dm (0.1 meter) 
+SLOW_DOWN_DISTANCE = 10  # in dm (0.15 meters)
 TURN_ANGLE = 45            # degrees to turn when avoiding obstacles
 
 # ==============================
@@ -95,7 +95,7 @@ prevLine = None
 # Global variables for artifact filtering
 front_distances = []
 MIN_READINGS_FRONT = 3  # Minimum readings in front sector to be valid
-MAX_DISTANCE_VARIANCE = 5  # Maximum allowed variance in distance readings (decimeters)
+MAX_DISTANCE_VARIANCE = 15  # Maximum allowed variance in distance readings (decimeters)
 
 def the_callback(angles, distances):
     global prevLine, front_distances
@@ -139,7 +139,7 @@ def the_callback(angles, distances):
         # Filter out if readings are too inconsistent (likely artifacts)
         if distance_variance > MAX_DISTANCE_VARIANCE:
             front_obstacle_raw = False
-            print(f"Artifact filtered: distance variance {distance_variance:.2f}m too high")
+            print(f"Artifact filtered: distance variance {distance_variance:.2f}dm too high")
         
         # Additional check: require multiple close readings
         close_readings = sum(1 for d in current_front_distances if d < SAFE_DISTANCE)
