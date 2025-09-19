@@ -55,8 +55,8 @@ def set_steering(angle):
     servo_pwm.ChangeDutyCycle(duty_cycle)
 
 # Obstacle avoidance parameters
-SAFE_DISTANCE = 1000  # mm (1 meter)
-SLOW_DOWN_DISTANCE = 1500  # mm (1.5 meters)
+SAFE_DISTANCE = 100  # mm (0.1 meter)
+SLOW_DOWN_DISTANCE = 150  # mm (0.1.5 meters)
 TURN_ANGLE = 45       # degrees to turn when avoiding obstacles
 
 # Initialize serial connection to LiDAR
