@@ -109,7 +109,7 @@ def the_callback(angles, distances):
     obstacle_front_distance = []
     
     max_distance = 0
-    farest_distance_angle = 0
+    TURN_ANGLE = 0
 
     # Check for obstacles
     for angle, distance in zip(angles, distances):
@@ -132,13 +132,11 @@ def the_callback(angles, distances):
             if distance > max_distance :
                 max_distance = distance
                 if angle <= math.pi:
-                    current_distance_angle = math.degrees(angle)
+                    current_angle = math.degrees(angle)
                 else:
                     current_angle = math.degrees(angle - 2*math.pi)  # Convert to negative for left side
                
-                farest_distance_angle = (farest_distance_angle + current_angle) / 2 # mean function to smooth
-
-    TURN_ANGLE = farest_distance_angle  # one servo actualisation pwm per serial package
+                TURN_ANGLE = (TURN_ANGLE + current_angle) / 2 # mean function to smooth
 
     # Artifact filtering for front obstacle detection
     if front_obstacle_raw and len(obstacle_front_distance) < MIN_READINGS_FRONT:
