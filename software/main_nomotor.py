@@ -96,13 +96,24 @@ obstacle_history = []
 HISTORY_SIZE = 5  # Number of recent readings to consider
 OBSTACLE_THRESHOLD = 0.6  # 60% of readings must detect obstacle
 
+# Global variables for smoothing and artifact filtering
+obstacle_history = []
+front_distances = []
+HISTORY_SIZE = 5  # Number of recent readings to consider
+OBSTACLE_THRESHOLD = 0.6  # 60% of readings must detect obstacle
+MIN_READINGS_FRONT = 3  # Minimum readings in front sector to be valid
+MAX_DISTANCE_VARIANCE = 0.5  # Maximum allowed variance in distance readings (meters)
+
 def the_callback(angles, distances):
-    global prevLine, obstacle_history
+    global prevLine, obstacle_history, front_distances
     
     # Obstacle avoidance logic
     front_obstacle_raw = False
     left_clear = True
     right_clear = True
+    
+    # Collect front sector distances for artifact filtering
+    current_front_distances = []
     
     # Check for obstacles
     for angle, distance in zip(angles, distances):
@@ -112,8 +123,10 @@ def the_callback(angles, distances):
             angle_norm -= 2 * math.pi
         
         # Front sector (-π/6 to π/6 radians, i.e., -30 to 30 degrees)
-        if abs(angle_norm) < math.pi/6 and distance < SAFE_DISTANCE:
-            front_obstacle_raw = True
+        if abs(angle_norm) < math.pi/6:
+            current_front_distances.append(distance)
+            if distance < SAFE_DISTANCE:
+                front_obstacle_raw = True
         
         # Left sector (π/6 to π/2 radians, i.e., 30 to 90 degrees)
         if math.pi/6 < angle_norm < math.pi/2 and distance < SAFE_DISTANCE:
@@ -122,6 +135,32 @@ def the_callback(angles, distances):
         # Right sector (-π/2 to -π/6 radians, i.e., -90 to -30 degrees)
         if -math.pi/2 < angle_norm < -math.pi/6 and distance < SAFE_DISTANCE:
             right_clear = False
+    
+    # Artifact filtering for front obstacle detection
+    if front_obstacle_raw and len(current_front_distances) >= MIN_READINGS_FRONT:
+        # Check for consistent readings (filter out single-point artifacts)
+        min_dist = min(current_front_distances)
+        max_dist = max(current_front_distances)
+        distance_variance = max_dist - min_dist
+        
+        # Filter out if readings are too inconsistent (likely artifacts)
+        if distance_variance > MAX_DISTANCE_VARIANCE:
+            front_obstacle_raw = False
+            print(f"Artifact filtered: distance variance {distance_variance:.2f}m too high")
+        
+        # Additional check: require multiple close readings
+        close_readings = sum(1 for d in current_front_distances if d < SAFE_DISTANCE)
+        if close_readings < 2:  # Need at least 2 close readings
+            front_obstacle_raw = False
+            print(f"Artifact filtered: only {close_readings} close readings")
+    
+    elif front_obstacle_raw and len(current_front_distances) < MIN_READINGS_FRONT:
+        # Not enough readings in front sector - likely artifact
+        front_obstacle_raw = False
+        print(f"Artifact filtered: insufficient front readings ({len(current_front_distances)})")
+    
+    # Store current front distances for potential future use
+    front_distances = current_front_distances
     
     # Add current reading to history and maintain size
     obstacle_history.append(front_obstacle_raw)
