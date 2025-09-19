@@ -138,7 +138,7 @@ def the_callback(angles, distances):
                
                 farest_distance_angle = (farest_distance_angle + current_angle) / 2 # mean function to smooth
 
-    farest_distance_angle = TURN_ANGLE # one servo actualisation pwm per serial package
+    TURN_ANGLE = farest_distance_angle  # one servo actualisation pwm per serial package
 
     # Artifact filtering for front obstacle detection
     if front_obstacle_raw and len(obstacle_front_distance) < MIN_READINGS_FRONT:
