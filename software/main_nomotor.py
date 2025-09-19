@@ -91,21 +91,14 @@ prevLine = None
 # ==============================
 # Callback for Processing LiDAR Data
 # ==============================
-# Global variables for smoothing
-obstacle_history = []
-HISTORY_SIZE = 5  # Number of recent readings to consider
-OBSTACLE_THRESHOLD = 0.6  # 60% of readings must detect obstacle
-
 # Global variables for smoothing and artifact filtering
-obstacle_history = []
+# Global variables for artifact filtering
 front_distances = []
-HISTORY_SIZE = 5  # Number of recent readings to consider
-OBSTACLE_THRESHOLD = 0.6  # 60% of readings must detect obstacle
 MIN_READINGS_FRONT = 3  # Minimum readings in front sector to be valid
 MAX_DISTANCE_VARIANCE = 0.5  # Maximum allowed variance in distance readings (meters)
 
 def the_callback(angles, distances):
-    global prevLine, obstacle_history, front_distances
+    global prevLine, front_distances
     
     # Obstacle avoidance logic
     front_obstacle_raw = False
@@ -162,19 +155,13 @@ def the_callback(angles, distances):
     # Store current front distances for potential future use
     front_distances = current_front_distances
     
-    # Add current reading to history and maintain size
-    obstacle_history.append(front_obstacle_raw)
-    if len(obstacle_history) > HISTORY_SIZE:
-        obstacle_history.pop(0)
-    
-    # Apply smoothing filter - obstacle confirmed if threshold percentage of recent readings detect it
-    obstacle_ratio = sum(obstacle_history) / len(obstacle_history)
-    front_obstacle = obstacle_ratio >= OBSTACLE_THRESHOLD
+    # Use filtered result directly (no smoothing)
+    front_obstacle = front_obstacle_raw
     
     # Decision making
     if front_obstacle:
         set_speed(0)  # slow down
-        print(f"front obstacle (smoothed: {obstacle_ratio:.2f}) \n angle : {angle_norm:.3f} rad \n distance : {distance}")
+        print(f"front obstacle detected \n distance readings: {len(current_front_distances)} \n min distance: {min(current_front_distances):.2f}m")
         
         if left_clear and right_clear:
             set_steering(TURN_ANGLE)  # default right
@@ -185,7 +172,7 @@ def the_callback(angles, distances):
         else:
             set_speed(0)  # reverse
             set_steering(0)
-            time.sleep(1)
+            #time.sleep(1)
     else:
         set_speed(0)  # move forward
         set_steering(0)
