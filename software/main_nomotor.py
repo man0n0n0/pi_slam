@@ -169,8 +169,8 @@ def the_callback(angles, distances):
     if front_obstacle:
         set_speed(0)  # slow down
         print(f"front obstacle detected \n distance readings: {len(current_front_distances)} \n min distance: {min(current_front_distances):.2f}m")
-            set_steering(TURN_ANGLE)
-            #time.sleep(1)
+        set_steering(TURN_ANGLE)
+        #time.sleep(1)
     else:
         set_speed(0)  # move forward
         set_steering(TURN_ANGLE)
