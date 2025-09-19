@@ -117,13 +117,9 @@ def the_callback(angles, distances):
 
     # Check for obstacles
     for angle, distance in zip(angles, distances):
-        # Normalize angle to [-π, π] range
-        angle_norm = angle % (2 * math.pi)
-        if angle_norm > math.pi:
-            angle_norm -= 2 * math.pi
         
         # Front sector ( pi / 6 i.e., -30 to 30 degrees)
-        if abs(angle_norm) < math.pi/6:
+        if abs(angle) < math.pi/6:
             current_front_distances.append(distance)
 
             if distance < SAFE_DISTANCE:
@@ -135,8 +131,8 @@ def the_callback(angles, distances):
             # Direction determination: keep the angle of the most distant point
             if distance > max_distance:
                 max_distance = distance
-                print(angle_norm)
-                TURN_ANGLE = math.degrees(angle_norm)
+                print(angle)
+                TURN_ANGLE = math.degrees(angle)
         
     # Artifact filtering for front obstacle detection
     if front_obstacle_raw and len(current_front_distances) >= MIN_READINGS_FRONT:
