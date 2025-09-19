@@ -154,7 +154,7 @@ def the_callback(angles, distances):
 
     else:
         #print(f"NO obstacle detected : {TURN_ANGLE} deg")
-        set_speed(10)  # move forward
+        set_speed(15)  # move forward
         set_steering(TURN_ANGLE)
 
 # ==============================
