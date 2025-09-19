@@ -99,12 +99,11 @@ prevLine = None
 # Global variables for smoothing and artifact filtering
 # Global variables for artifact filtering
 front_distances = []
-max_distance = 0
 MIN_READINGS_FRONT = 3  # Minimum readings in front sector to be valid
 MAX_DISTANCE_VARIANCE = 15  # Maximum allowed variance in distance readings (decimeters)
 
 def the_callback(angles, distances):
-    global prevLine, front_distances, max_distance
+    global prevLine, front_distances
     
     # Obstacle avoidance logic
     front_obstacle_raw = False
@@ -114,6 +113,8 @@ def the_callback(angles, distances):
     # Collect front sector distances for artifact filtering
     current_front_distances = []
     
+    max_distance = 0
+
     # Check for obstacles
     for angle, distance in zip(angles, distances):
         # Normalize angle to [-π, π] range
