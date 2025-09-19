@@ -120,7 +120,7 @@ def the_callback(angles, distances):
     # Decision making
     if front_obstacle:
         set_speed(0)  # slow down
-        #print(f"front obstacle  \n angle : {angle_deg} \n distance : {distance}")
+        print(f"front obstacle  \n angle : {angle_deg} \n distance : {distance}")
         if left_clear and right_clear:
             set_steering(TURN_ANGLE)  # default right
         elif left_clear:
