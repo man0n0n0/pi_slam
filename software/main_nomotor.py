@@ -76,8 +76,7 @@ SAFE_DISTANCE = 2    # in dm
 
 # Global variables for artifact filtering
 front_distances = []
-MIN_READINGS_FRONT = 3  # Minimum readings in front sector to be valid
-MAX_DISTANCE_VARIANCE = 50  # Maximum allowed variance in distance readings (decimeters)
+MIN_READINGS_FRONT = 10  # Minimum readings in front sector to be valid
 
 # ==============================
 # Serial Connection to LiDAR
