@@ -32,25 +32,33 @@ time.sleep(2)
 esc_pwm.ChangeDutyCycle(7.5)    # Move to neutral
 time.sleep(2)
 
-
-
-
-
 # ==============================
 # Motor Control Functions
 # ==============================
-def set_speed(speed_percent: float):
-    """
-    Set robot speed using PWM ESC.
-    :param speed_percent: -100 (full reverse) to 100 (full forward)
-    """
-    speed_percent = max(-100, min(100, speed_percent))  # clamp
+# def set_speed(speed_percent: float):
+#     """
+#     Set robot speed using PWM ESC.
+#     :param speed_percent: -100 (full reverse) to 100 (full forward)
+#     """
+#     speed_percent = max(-100, min(100, speed_percent))  # clamp
 
-    # Convert percentage to duty cycle (typically 5-10% for ESCs)
-    # Neutral at 7.5%, full forward at 10%, full reverse at 5%
+#     # Convert percentage to duty cycle (typically 5-10% for ESCs)
+#     # Neutral at 7.5%, full forward at 10%, full reverse at 5%
+#     duty_cycle = 7.5 + (speed_percent / 100) * 2.5
+#     esc_pwm.ChangeDutyCycle(duty_cycle)
+current_speed = 0
+def set_speed(speed_percent: float):
+    global current_speed
+    speed_percent = max(-100, min(100, speed_percent))
+    
+    # If changing direction, pause at neutral first
+    if (current_speed > 0 and speed_percent < 0) or (current_speed < 0 and speed_percent > 0):
+        esc_pwm.ChangeDutyCycle(7.5)  # Neutral
+        time.sleep(0.2)
+    
     duty_cycle = 7.5 + (speed_percent / 100) * 2.5
     esc_pwm.ChangeDutyCycle(duty_cycle)
-
+    current_speed = speed_percent
 
 def set_steering(angle: float):
     """
@@ -144,7 +152,6 @@ def the_callback(angles, distances):
     set_steering(TURN_ANGLE)
 
     if FRONT_OBJECT:
-        set_speed(0)
         set_speed(BACKWARD_SPEED)
     else :
         # Speed based on a exponential functin that tend to max speed (k_value)
