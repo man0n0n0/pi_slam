@@ -72,7 +72,6 @@ def set_steering(angle: float):
 # Obstacle Avoidance Parameters
 # ==============================
 SAFE_DISTANCE = 7   # in dm 
-MAX_MESURED_DISTANCE = 40   # in dm 
 K_SPEED = 30 # max speed for exponential function
 BACKWARD_SPEED = -30
 STEEPNESS_SPEED = 10 # Smaller steepness (e.g., 5) = faster acceleration, reaches max speed sooner // larger steepness gentler acceleration, more gradual speed increase
