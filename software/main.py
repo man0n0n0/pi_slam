@@ -133,8 +133,10 @@ def the_callback(angles, distances):
         # convert rad to degree
         if current_steering_angle <= math.pi:
             steering_degrees = math.degrees(current_steering_angle)
+            print("right")
         else:
             steering_degrees = math.degrees(current_steering_angle - 2*math.pi)
+            print("left")
         
         # exponential filter to smooth direction
         TURN_ANGLE = TURN_ANGLE*0.7 + current_steering_angle*0.3
