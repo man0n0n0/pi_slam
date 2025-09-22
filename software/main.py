@@ -174,18 +174,18 @@ def the_callback(angles, distances):
             obstacle_start_time = current_time
         
         if current_time - obstacle_start_time < REVERSE_TIME:
-            set_speed_safe(BACKWARD_SPEED)  # Reverse
+            set_speed(BACKWARD_SPEED)  # Reverse
         else:
             # Turn toward clearest side
             if left_clear_count > right_clear_count:
                 set_steering(-25)  # Turn left
             else:
                 set_steering(25)   # Turn right
-            set_speed_safe(K_SPEED * 0.4)  # Slow forward
+            set_speed(K_SPEED * 0.4)  # Slow forward
     else:
         obstacle_start_time = 0  # Reset
         set_steering(TURN_ANGLE)
-        set_speed_safe(K_SPEED * (1 - math.exp(-MAX_DISTANCE/STEEPNESS_SPEED)))
+        set_speed(K_SPEED * (1 - math.exp(-MAX_DISTANCE/STEEPNESS_SPEED)))
 
         
 # ==============================
