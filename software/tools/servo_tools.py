@@ -55,7 +55,7 @@ def set_steering(angle: float):
 #     set_speed(v)
 #     time.sleep(0.2)
 
-for v in range (-30,30):
+for v in range (-45,45):
     print(v)
     set_steering(v)
     time.sleep(0.2)
