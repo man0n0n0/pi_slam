@@ -73,8 +73,8 @@ def set_steering(angle: float):
 # ==============================
 SAFE_DISTANCE = 5    # in dm 
 MAX_MESURED_DISTANCE = 40   # in dm 
-K_SPEED = 40 # max speed for exponential function
-STEEPNESS_SPEED = 5 # Smaller steepness (e.g., 5) = faster acceleration, reaches max speed sooner // larger steepness gentler acceleration, more gradual speed increase
+K_SPEED = 30 # max speed for exponential function
+STEEPNESS_SPEED = 10 # Smaller steepness (e.g., 5) = faster acceleration, reaches max speed sooner // larger steepness gentler acceleration, more gradual speed increase
 MIN_READINGS_FRONT = 5  # Minimum readings in front sector to be valid ([# )Global variables for artifact filtering)
 
 # ==============================
