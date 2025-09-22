@@ -107,7 +107,8 @@ BACKWARD_SPEED = -20
 STEEPNESS_SPEED = 10 # Smaller steepness (e.g., 5) = faster acceleration, reaches max speed sooner // larger steepness gentler acceleration, more gradual speed increase
 MIN_READINGS_FRONT = 30  # Minimum readings in front sector to be valid ([# )Global variables for artifact filtering)
 
-REVERSE_TIME = 2.0  # Reverse for 2 seconds before trying sides
+REVERSE_TIME = 4.0  # Reverse for 2 seconds before trying sides
+IGNORE_DURATION = 2.0
 # ==============================
 # Serial Connection to LiDAR
 # ==============================
@@ -125,6 +126,7 @@ angles = []
 distances = []
 TURN_ANGLE = 0
 obstacle_start_time = 0
+ignore_obstacle_until = 0
 prevLine = None
 
 # ==============================
@@ -143,6 +145,11 @@ def the_callback(angles, distances):
     # Check front + count left/right clear readings
     left_clear_count = 0
     right_clear_count = 0
+
+    # To ensure backward for 
+    if time.time() < ignore_obstacle_until:
+        set_speed(BACKWARD_SPEED)
+        return
     
     for angle, distance in zip(angles, distances):
         if (angle <= boundaries[0]) or (angle >= boundaries[1]):
@@ -170,6 +177,8 @@ def the_callback(angles, distances):
     # Simple escape logic
     if FRONT_OBJECT:
         current_time = time.time()
+        ignore_obstacle_until = current_time + IGNORE_DURATION
+
         if obstacle_start_time == 0:
             obstacle_start_time = current_time
         
