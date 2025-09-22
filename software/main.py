@@ -102,19 +102,15 @@ prevLine = None
 def the_callback(angles, distances):
     global prevLine
     
-    # Obstacle avoidance logic
-    front_obstacle_raw = False
-    
-    # Collect front sector distances for artifact filtering
-    FRONT_READINGS = []
-
     # Local variable init
     MAX_DISTANCE = 0
     TURN_ANGLE = 0
+    front_obstacle_raw = False    # Obstacle avoidance logic
+    FRONT_READINGS = 0    # Collect front sector distances for artifact filtering
 
 
     print(zip(angles, distances))
-    
+
     # Check for obstacles
     for angle, distance in zip(angles, distances):
             
