@@ -123,8 +123,6 @@ def the_callback(angles, distances):
     front_obstacle_raw = False    # Obstacle avoidance logic
     FRONT_READINGS = 0    # Collect front sector distances for artifact filtering
 
-
-
     # Check for obstacles
     for angle, distance in zip(angles, distances):
             
@@ -140,15 +138,16 @@ def the_callback(angles, distances):
                     front_obstacle_raw = True
                     break
 
-            # Direction determination: keep the angle of the most distant point
-            if distance > MAX_DISTANCE :
-                MAX_DISTANCE = distance
-                if angle <= math.pi:
-                    current_angle = math.degrees(angle)
-                else:
-                    current_angle = math.degrees(angle - 2*math.pi)  # Convert to negative for left side
+    #         # Direction determination: keep the angle of the most distant point
+    #         if distance > MAX_DISTANCE :
+    #             MAX_DISTANCE = distance
+    #             if angle <= math.pi:
+    #                 current_angle = math.degrees(angle)
+    #             else:
+    #                 current_angle = math.degrees(angle - 2*math.pi)  # Convert to negative for left side
     
-    TURN_ANGLE = TURN_ANGLE*0.7 + current_angle*0.3 # exponential filter to smooth directio
+    # TURN_ANGLE = TURN_ANGLE*0.7 + current_angle*0.3 # exponential filter to smooth direction
+    
     set_steering(TURN_ANGLE)
 
 
