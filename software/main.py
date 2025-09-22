@@ -103,7 +103,7 @@ def the_callback(angles, distances):
     # Local variable init
     MAX_DISTANCE = 0
     FRONT_READINGS = 0    # Collect front sector distances for artifact filtering
-    current_angle = 0
+    current_steering_angle = 0
     bundaries = [math.pi/6,11*math.pi/6] # to avoid computation in the iterative loop
 
     # Check for obstacles
@@ -117,24 +117,21 @@ def the_callback(angles, distances):
                 FRONT_READINGS += 1
                 if FRONT_READINGS >= MIN_READINGS_FRONT :
                     set_speed(-30)  # move backward
-                    break
 
             # Direction determination: keep the angle of the most distant point
-            if distance > MAX_DISTANCE :
+            elif distance > MAX_DISTANCE :
                 MAX_DISTANCE = distance
-                if angle <= math.pi:
-                    current_angle = math.degrees(angle)
-                else:
-                    current_angle = math.degrees(angle - 2*math.pi)  # Convert to negative for left side
-    
+                current_steering_angle = angle
+
     # Set direction
-    TURN_ANGLE = TURN_ANGLE*0.7 + current_angle*0.3 # exponential filter to smooth direction
+    # convert rad to degree
+    current_steering_angle = math.degrees(angle) if current_steering_angle <= math.pi else math.degrees(angle - 2*math.pi)  # Convert to negative for left side
+    TURN_ANGLE = TURN_ANGLE*0.7 + current_steering_angle*0.3 # exponential filter to smooth direction
     set_steering(TURN_ANGLE)
 
     # Speed based on a exponential functin that tend to max speed (k_value)
     set_speed(K_SPEED * (1 - math.exp(-MAX_DISTANCE/STEEPNESS_SPEED)))
         
-
 # ==============================
 # Cleanup Function
 # ==============================
