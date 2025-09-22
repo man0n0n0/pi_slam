@@ -127,7 +127,7 @@ def the_callback(angles, distances):
     # Set direction
     # convert rad to degree
     print(current_steering_angle, MAX_DISTANCE)
-    current_steering_angle = math.degrees(angle) if current_steering_angle <= math.pi else math.degrees(angle - 2*math.pi)  # Convert to negative for left side
+    current_steering_angle = math.degrees(current_steering_angle) if current_steering_angle <= math.pi else math.degrees(current_steering_angle - 2*math.pi)  # Convert to negative for left side
     TURN_ANGLE = TURN_ANGLE*0.7 + current_steering_angle*0.3 # exponential filter to smooth direction
     set_steering(TURN_ANGLE)
 
