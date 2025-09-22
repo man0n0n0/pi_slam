@@ -104,6 +104,7 @@ def the_callback(angles, distances):
     # Local variable init
     MAX_DISTANCE = 0
     FRONT_READINGS = 0    # Collect front sector distances for artifact filtering
+    FRONT_OBJECT = False
     current_steering_angle = 0
     #bundaries = [math.pi/6,11*math.pi/6] # +- 30deg to avoid computation in the iterative loop
     boundaries = [math.pi/4, 7*math.pi/4]  # ±45° (45° and 315°)
