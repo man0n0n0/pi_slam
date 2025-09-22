@@ -105,8 +105,8 @@ def the_callback(angles, distances):
     MAX_DISTANCE = 0
     FRONT_READINGS = 0    # Collect front sector distances for artifact filtering
     FRONT_OBJECT = False
-    current_steering_angle = 0
-    
+    current_steering_angle = None
+
     #bundaries = [math.pi/6,11*math.pi/6] # +- 30deg to avoid computation in the iterative loop
     boundaries = [math.pi/4, 7*math.pi/4]  # ±45° (45° and 315°)
 
@@ -121,7 +121,6 @@ def the_callback(angles, distances):
                 FRONT_READINGS += 1 #to avoid artifacts
                 if FRONT_READINGS >= MIN_READINGS_FRONT :
                     FRONT_OBJECT = True
-                    break
 
             # Direction determination: keep the angle of the most distant point
             elif distance > MAX_DISTANCE :
@@ -129,10 +128,17 @@ def the_callback(angles, distances):
                 current_steering_angle = angle
 
     # Set direction
-    # convert rad to degree
-    current_steering_angle = math.degrees(current_steering_angle) if current_steering_angle <= math.pi else math.degrees(current_steering_angle - 2*math.pi)  # Convert to negative for left side
-    TURN_ANGLE = TURN_ANGLE*0.7 + current_steering_angle*0.3 # exponential filter to smooth direction
-    set_steering(TURN_ANGLE)
+    if current_steering_angle is not None:
+        
+        # convert rad to degree
+        if current_steering_angle <= math.pi:
+            steering_degrees = math.degrees(current_steering_angle)
+        else:
+            steering_degrees = math.degrees(current_steering_angle - 2*math.pi)
+        
+        TURN_ANGLE = TURN_ANGLE*0.7 + current_steering_angle*0.3 # exponential filter to smooth direction
+        
+        set_steering(TURN_ANGLE)
 
     if FRONT_OBJECT:
         set_speed(BACKWARD_SPEED)
