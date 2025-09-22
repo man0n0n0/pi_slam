@@ -181,7 +181,7 @@ def the_callback(angles, distances):
                 set_steering(-25)  # Turn left
             else:
                 set_steering(25)   # Turn right
-            set_speed(K_SPEED * 0.4)  # Slow forward
+            set_speed(BACKWARD_SPEED)  # Reverse
     else:
         obstacle_start_time = 0  # Reset
         set_steering(TURN_ANGLE)
