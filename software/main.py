@@ -116,6 +116,7 @@ def the_callback(angles, distances):
             if distance < SAFE_DISTANCE :
                 FRONT_READINGS += 1
                 if FRONT_READINGS >= MIN_READINGS_FRONT :
+                    print("front obejct : going backward")
                     set_speed(-30)  # move backward
 
             # Direction determination: keep the angle of the most distant point

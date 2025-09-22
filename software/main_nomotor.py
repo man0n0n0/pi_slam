@@ -71,12 +71,11 @@ def set_steering(angle: float):
 # ==============================
 # Obstacle Avoidance Parameters
 # ==============================
-SLOW_DOWN_DISTANCE = 5  # in dm
-SAFE_DISTANCE = 2    # in dm 
-
-# Global variables for artifact filtering
-front_distances = []
-MIN_READINGS_FRONT = 10  # Minimum readings in front sector to be valid
+SAFE_DISTANCE = 5    # in dm 
+MAX_MESURED_DISTANCE = 40   # in dm 
+K_SPEED = 30 # max speed for exponential function
+STEEPNESS_SPEED = 10 # Smaller steepness (e.g., 5) = faster acceleration, reaches max speed sooner // larger steepness gentler acceleration, more gradual speed increase
+MIN_READINGS_FRONT = 5  # Minimum readings in front sector to be valid ([# )Global variables for artifact filtering)
 
 # ==============================
 # Serial Connection to LiDAR
@@ -93,70 +92,49 @@ ser = serial.Serial(
 tmpString = ""
 angles = []
 distances = []
+TURN_ANGLE = 0
 prevLine = None
 
 # ==============================
 # Callback for Processing LiDAR Data
 # ==============================
 def the_callback(angles, distances):
-    global prevLine, front_distances
-    
-    # Obstacle avoidance logic
-    front_obstacle_raw = False
-    slow_down = False
-    
-    # Collect front sector distances for artifact filtering
-    obstacle_front_distance = []
-    
-    max_distance = 0
-    TURN_ANGLE = 0
+    global prevLine, TURN_ANGLE
+    # Local variable init
+    MAX_DISTANCE = 0
+    FRONT_READINGS = 0    # Collect front sector distances for artifact filtering
+    current_steering_angle = 0
+    bundaries = [math.pi/6,11*math.pi/6] # to avoid computation in the iterative loop
 
     # Check for obstacles
     for angle, distance in zip(angles, distances):
             
-        # Front sector: 0° ± 30° (considering wraparound)
-        # This covers [330°-360°] and [0°-30°] in degrees
-        # Or [11π/6 - 2π] and [0 - π/6] in radians
-        front_condition = (angle<= math.pi/6) or (angle >= 11*math.pi/6)
-        
-        if front_condition:
+        # Front sector: 0° ± 30° (considering wraparound) so [11π/6 - 2π] and [0 - π/6] in radians        
+        if (angle<= bundaries[0]) or (angle >= bundaries[1]):
 
-            if distance < SAFE_DISTANCE:
-                obstacle_front_distance.append(distance)
-                front_obstacle_raw = True
-
-            if distance < SLOW_DOWN_DISTANCE:
-                slow_down = True
+            # Safety mesure : emergency stop with safe distance
+            if distance < SAFE_DISTANCE :
+                FRONT_READINGS += 1
+                if FRONT_READINGS >= MIN_READINGS_FRONT :
+                    print("front obejct : going backward")
+                    set_speed(0)  # move backward
 
             # Direction determination: keep the angle of the most distant point
-            if distance > max_distance :
-                max_distance = distance
-                if angle <= math.pi:
-                    current_angle = math.degrees(angle)
-                else:
-                    current_angle = math.degrees(angle - 2*math.pi)  # Convert to negative for left side
-               
-                TURN_ANGLE = (TURN_ANGLE + current_angle) / 2 # mean function to smooth
+            elif distance > MAX_DISTANCE :
+                MAX_DISTANCE = distance
+                current_steering_angle = angle
 
-    # Artifact filtering for front obstacle detection
-    if front_obstacle_raw and len(obstacle_front_distance) < MIN_READINGS_FRONT:
-        # Not enough readings in front sector - likely artifact
-        front_obstacle_raw = False
-    
-    # Decision making
-    if front_obstacle_raw:
-        set_speed(0)  # move backward
+    # Set direction
+    # convert rad to degree
+    print(current_steering_angle, MAX_DISTANCE)
+    current_steering_angle = math.degrees(angle) if current_steering_angle <= math.pi else math.degrees(angle - 2*math.pi)  # Convert to negative for left side
+    TURN_ANGLE = TURN_ANGLE*0.7 + current_steering_angle*0.3 # exponential filter to smooth direction
+    set_steering(TURN_ANGLE)
 
-    elif slow_down:
-        #print(f"far front_obstacle : {TURN_ANGLE} deg")
-        set_speed(0)  # move forward
-        set_steering(TURN_ANGLE)
-
-    else:
-        #print(f"NO obstacle detected : {TURN_ANGLE} deg")
-        set_speed(0)  # move forward
-        set_steering(TURN_ANGLE)
-
+    # Speed based on a exponential functin that tend to max speed (k_value)
+    #set_speed(K_SPEED * (1 - math.exp(-MAX_DISTANCE/STEEPNESS_SPEED)))
+    set_speed(0)  
+     
 # ==============================
 # Cleanup Function
 # ==============================
