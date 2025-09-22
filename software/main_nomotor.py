@@ -104,12 +104,13 @@ def the_callback(angles, distances):
     MAX_DISTANCE = 0
     FRONT_READINGS = 0    # Collect front sector distances for artifact filtering
     current_steering_angle = 0
-    bundaries = [math.pi/6,11*math.pi/6] # to avoid computation in the iterative loop
+    #bundaries = [math.pi/6,11*math.pi/6] # to avoid computation in the iterative loop
+    boundaries = [math.pi/4, 7*math.pi/4]  # ±45° (45° and 315°)
 
     # Check for obstacles
     for angle, distance in zip(angles, distances):
             
-        # Front sector: 0° ± 30° (considering wraparound) so [11π/6 - 2π] and [0 - π/6] in radians        
+        # Front sector
         if (angle<= bundaries[0]) or (angle >= bundaries[1]):
 
             # Safety mesure : emergency stop with safe distance
@@ -134,7 +135,7 @@ def the_callback(angles, distances):
     # Speed based on a exponential functin that tend to max speed (k_value)
     #set_speed(K_SPEED * (1 - math.exp(-MAX_DISTANCE/STEEPNESS_SPEED)))
     set_speed(0)  
-     
+
 # ==============================
 # Cleanup Function
 # ==============================

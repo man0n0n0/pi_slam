@@ -74,6 +74,7 @@ def set_steering(angle: float):
 SAFE_DISTANCE = 5    # in dm 
 MAX_MESURED_DISTANCE = 40   # in dm 
 K_SPEED = 30 # max speed for exponential function
+BACKWARD_SPEED = -20
 STEEPNESS_SPEED = 10 # Smaller steepness (e.g., 5) = faster acceleration, reaches max speed sooner // larger steepness gentler acceleration, more gradual speed increase
 MIN_READINGS_FRONT = 5  # Minimum readings in front sector to be valid ([# )Global variables for artifact filtering)
 
@@ -104,13 +105,14 @@ def the_callback(angles, distances):
     MAX_DISTANCE = 0
     FRONT_READINGS = 0    # Collect front sector distances for artifact filtering
     current_steering_angle = 0
-    bundaries = [math.pi/6,11*math.pi/6] # to avoid computation in the iterative loop
+    #bundaries = [math.pi/6,11*math.pi/6] # +- 30deg to avoid computation in the iterative loop
+    boundaries = [math.pi/4, 7*math.pi/4]  # ±45° (45° and 315°)
 
     # Check for obstacles
     for angle, distance in zip(angles, distances):
             
-        # Front sector: 0° ± 30° (considering wraparound) so [11π/6 - 2π] and [0 - π/6] in radians        
-        if (angle<= bundaries[0]) or (angle >= bundaries[1]):
+        # Front sector:        
+        if (angle<= boundaries[0]) or (angle >= boundaries[1]):
 
             # Safety mesure : emergency stop with safe distance
             if distance < SAFE_DISTANCE :
@@ -130,8 +132,11 @@ def the_callback(angles, distances):
     TURN_ANGLE = TURN_ANGLE*0.7 + current_steering_angle*0.3 # exponential filter to smooth direction
     set_steering(TURN_ANGLE)
 
-    # Speed based on a exponential functin that tend to max speed (k_value)
-    set_speed(K_SPEED * (1 - math.exp(-MAX_DISTANCE/STEEPNESS_SPEED)))
+    if FRONT_OBJECT:
+        set_speed(BACKWARD_SPEED)
+    else :
+        # Speed based on a exponential functin that tend to max speed (k_value)
+        set_speed(K_SPEED * (1 - math.exp(-MAX_DISTANCE/STEEPNESS_SPEED)))
         
 # ==============================
 # Cleanup Function
