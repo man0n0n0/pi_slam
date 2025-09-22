@@ -131,53 +131,62 @@ prevLine = None
 # Callback for Processing LiDAR Data
 # ==============================
 def the_callback(angles, distances):
-    global prevLine, TURN_ANGLE
-    # Local variable init
+    global prevLine, TURN_ANGLE, obstacle_start_time
+    
+    # Your existing obstacle detection code here...
     MAX_DISTANCE = 0
-    FRONT_READINGS = 0    # Collect front sector distances for artifact filtering
+    FRONT_READINGS = 0
     FRONT_OBJECT = False
     current_steering_angle = None
-
-    #bundaries = [math.pi/6,11*math.pi/6] # +- 30deg to avoid computation in the iterative loop
-    boundaries = [math.pi/4, 7*math.pi/4]  # ±45° (45° and 315°)
-
-    # Check for obstacles
+    boundaries = [math.pi/4, 7*math.pi/4]
+    
+    # Check front + count left/right clear readings
+    left_clear_count = 0
+    right_clear_count = 0
+    
     for angle, distance in zip(angles, distances):
-            
-        # Front sector:        
-        if (angle<= boundaries[0]) or (angle >= boundaries[1]):
-
-            # Safety mesure : emergency stop with safe distance
-            if distance < SAFE_DISTANCE :
-                FRONT_READINGS += 1 #to avoid artifacts
-                if FRONT_READINGS >= MIN_READINGS_FRONT :
+        if (angle <= boundaries[0]) or (angle >= boundaries[1]):
+            # Front detection (your existing code)
+            if distance < SAFE_DISTANCE:
+                FRONT_READINGS += 1
+                if FRONT_READINGS >= MIN_READINGS_FRONT:
                     FRONT_OBJECT = True
-
-            # Direction determination: keep the angle of the most distant point
-            if distance > MAX_DISTANCE :
+            if distance > MAX_DISTANCE:
                 MAX_DISTANCE = distance
                 current_steering_angle = angle
-
-    # Set direction
-    if current_steering_angle is not None:
-
-        # convert rad to degree
-        if current_steering_angle <= math.pi:
-            steering_degrees = math.degrees(current_steering_angle)
         else:
-            steering_degrees = math.degrees(current_steering_angle - 2*math.pi)
-        
-        # exponential filter to smooth direction
+            # Count clear space on sides
+            if distance > SAFE_DISTANCE * 1.5:
+                if math.pi/2 <= angle <= math.pi:      # Left
+                    left_clear_count += 1
+                elif math.pi <= angle <= 3*math.pi/2:  # Right  
+                    right_clear_count += 1
+    
+    # Update steering
+    if current_steering_angle is not None:
+        steering_degrees = math.degrees(current_steering_angle) if current_steering_angle <= math.pi else math.degrees(current_steering_angle - 2*math.pi)
         TURN_ANGLE = TURN_ANGLE*0.7 + steering_degrees*0.3
-
-    set_steering(TURN_ANGLE)
-
+    
+    # Simple escape logic
     if FRONT_OBJECT:
-        set_speed(BACKWARD_SPEED)
-        time.sleep(0.5)
-    else :
-        # Speed based on a exponential functin that tend to max speed (k_value)
-        set_speed(K_SPEED * (1 - math.exp(-MAX_DISTANCE/STEEPNESS_SPEED)))
+        current_time = time.time()
+        if obstacle_start_time == 0:
+            obstacle_start_time = current_time
+        
+        if current_time - obstacle_start_time < REVERSE_TIME:
+            set_speed_safe(BACKWARD_SPEED)  # Reverse
+        else:
+            # Turn toward clearest side
+            if left_clear_count > right_clear_count:
+                set_steering(-25)  # Turn left
+            else:
+                set_steering(25)   # Turn right
+            set_speed_safe(K_SPEED * 0.4)  # Slow forward
+    else:
+        obstacle_start_time = 0  # Reset
+        set_steering(TURN_ANGLE)
+        set_speed_safe(K_SPEED * (1 - math.exp(-MAX_DISTANCE/STEEPNESS_SPEED)))
+
         
 # ==============================
 # Cleanup Function
