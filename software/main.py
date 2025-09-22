@@ -94,22 +94,40 @@ ser = serial.Serial(
 tmpString = ""
 angles = []
 distances = []
+TURN_ANGLE = 0
 prevLine = None
 
 # ==============================
 # Callback for Processing LiDAR Data
 # ==============================
 def the_callback(angles, distances):
-    global prevLine
+##################
+    """Find the farthest point using simple iteration"""
+    max_distance = -1
+    farthest_angle = None
+    farthest_index = -1
     
+    for i, (angle, distance) in enumerate(zip(angles, distances)):
+        if distance > max_distance:
+            max_distance = distance
+            farthest_angle = angle
+            farthest_index = i
+    
+    return {
+        'distance': max_distance,
+        'angle': farthest_angle,
+        'angle_degrees': math.degrees(farthest_angle),
+        'index': farthest_index
+    }
+##################
+
+    global prevLine, TURN_ANGLE
     # Local variable init
     MAX_DISTANCE = 0
-    TURN_ANGLE = 0
     front_obstacle_raw = False    # Obstacle avoidance logic
     FRONT_READINGS = 0    # Collect front sector distances for artifact filtering
 
 
-    print(zip(angles, distances))
 
     # Check for obstacles
     for angle, distance in zip(angles, distances):
@@ -133,8 +151,11 @@ def the_callback(angles, distances):
                     current_angle = math.degrees(angle)
                 else:
                     current_angle = math.degrees(angle - 2*math.pi)  # Convert to negative for left side
-                TURN_ANGLE = TURN_ANGLE*0.7 + current_angle*0.3 # exponential filter to smooth direction
     
+    TURN_ANGLE = TURN_ANGLE*0.7 + current_angle*0.3 # exponential filter to smooth directio
+    set_steering(TURN_ANGLE)
+
+
     # Decision making
     if front_obstacle_raw:
         set_speed(-20)  # move backward
@@ -144,7 +165,7 @@ def the_callback(angles, distances):
         #print(f"NO obstacle detected : {TURN_ANGLE} deg")
         #consider the proportionnal speed base on a k ration (speed at 10dm = 1m distance)
         set_speed(MAX_DISTANCE*K_SPEED/10) #speed depends of max distance
-        set_steering(TURN_ANGLE)
+        
 
 # ==============================
 # Cleanup Function
