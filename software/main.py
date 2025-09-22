@@ -133,21 +133,19 @@ def the_callback(angles, distances):
         # convert rad to degree
         if current_steering_angle <= math.pi:
             steering_degrees = math.degrees(current_steering_angle)
-            print("right")
         else:
             steering_degrees = math.degrees(current_steering_angle - 2*math.pi)
-            print("left")
         
         # exponential filter to smooth direction
         TURN_ANGLE = TURN_ANGLE*0.7 + steering_degrees*0.3
 
-    print(TURN_ANGLE)
     set_steering(TURN_ANGLE)
 
     if FRONT_OBJECT:
         set_speed(BACKWARD_SPEED)
     else :
         # Speed based on a exponential functin that tend to max speed (k_value)
+        print(MAX_DISTANCE)
         set_speed(K_SPEED * (1 - math.exp(-MAX_DISTANCE/STEEPNESS_SPEED)))
         
 # ==============================
