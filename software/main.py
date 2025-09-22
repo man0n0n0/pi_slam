@@ -129,16 +129,17 @@ def the_callback(angles, distances):
 
     # Set direction
     if current_steering_angle is not None:
-        
+
         # convert rad to degree
         if current_steering_angle <= math.pi:
             steering_degrees = math.degrees(current_steering_angle)
         else:
             steering_degrees = math.degrees(current_steering_angle - 2*math.pi)
         
-        TURN_ANGLE = TURN_ANGLE*0.7 + current_steering_angle*0.3 # exponential filter to smooth direction
-        
-        set_steering(TURN_ANGLE)
+        # exponential filter to smooth direction
+        TURN_ANGLE = TURN_ANGLE*0.7 + current_steering_angle*0.3
+
+    set_steering(TURN_ANGLE)
 
     if FRONT_OBJECT:
         set_speed(BACKWARD_SPEED)
