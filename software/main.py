@@ -170,13 +170,12 @@ def the_callback(angles, distances):
         # exponential filter to smooth direction
         TURN_ANGLE = TURN_ANGLE*0.7 + steering_degrees*0.3
 
-
+    set_steering(TURN_ANGLE)
 
     if FRONT_OBJECT:
-        set_steering(-TURN_ANGLE)
         set_speed(BACKWARD_SPEED)
+        time.sleep(0.1)
     else :
-        set_steering(TURN_ANGLE)
         # Speed based on a exponential functin that tend to max speed (k_value)
         set_speed(K_SPEED * (1 - math.exp(-MAX_DISTANCE/STEEPNESS_SPEED)))
         
