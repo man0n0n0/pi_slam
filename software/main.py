@@ -62,27 +62,27 @@ current_speed = 0
 
 
 def set_speed(target_speed: float, step_size: float = 5.0):
-"""
-Gradually change speed to avoid shocking the ESC
-"""
-global current_speed
+    """
+    Gradually change speed to avoid shocking the ESC
+    """
+    global current_speed
 
-target_speed = max(-100, min(100, target_speed))
+    target_speed = max(-100, min(100, target_speed))
 
-while abs(current_speed - target_speed) > step_size:
-    if current_speed < target_speed:
-        current_speed += step_size
-    else:
-        current_speed -= step_size
-        
+    while abs(current_speed - target_speed) > step_size:
+        if current_speed < target_speed:
+            current_speed += step_size
+        else:
+            current_speed -= step_size
+            
+        duty_cycle = 7.5 + (current_speed / 100) * 2.5
+        esc_pwm.ChangeDutyCycle(duty_cycle)
+        time.sleep(0.05)  # Small delay between steps
+
+    # Final adjustment
+    current_speed = target_speed
     duty_cycle = 7.5 + (current_speed / 100) * 2.5
     esc_pwm.ChangeDutyCycle(duty_cycle)
-    time.sleep(0.05)  # Small delay between steps
-
-# Final adjustment
-current_speed = target_speed
-duty_cycle = 7.5 + (current_speed / 100) * 2.5
-esc_pwm.ChangeDutyCycle(duty_cycle)
 
 def set_steering(angle: float):
     """
