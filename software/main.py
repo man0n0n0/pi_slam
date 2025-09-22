@@ -73,11 +73,9 @@ def set_steering(angle: float):
 # ==============================
 SAFE_DISTANCE = 5    # in dm 
 MAX_MESURED_DISTANCE = 40   # in dm 
-
-K_SPEED = 30 # proportional quotient (speed for 1m distance object)
-
-# Global variables for artifact filtering
-MIN_READINGS_FRONT = 5  # Minimum readings in front sector to be valid
+K_SPEED = 50 # max speed for exponential function
+STEEPNESS_SPEED = 5 # Smaller steepness (e.g., 5) = faster acceleration, reaches max speed sooner // larger steepness gentler acceleration, more gradual speed increase
+MIN_READINGS_FRONT = 5  # Minimum readings in front sector to be valid ([# )Global variables for artifact filtering)
 
 # ==============================
 # Serial Connection to LiDAR
@@ -101,27 +99,12 @@ prevLine = None
 # Callback for Processing LiDAR Data
 # ==============================
 def the_callback(angles, distances):
-##################
-    """Find the farthest point using simple iteration"""
-    max_distance = -1
-    farthest_angle = None
-    farthest_index = -1
-    
-    for i, (angle, distance) in enumerate(zip(angles, distances)):
-        if distance > max_distance:
-            max_distance = distance
-            farthest_angle = angle
-            farthest_index = i
-    
-    print(f'distance{max_distance}angle_degrees{math.degrees(farthest_angle)}')
-
-    ##################
-
     global prevLine, TURN_ANGLE
     # Local variable init
     MAX_DISTANCE = 0
     front_obstacle_raw = False    # Obstacle avoidance logic
     FRONT_READINGS = 0    # Collect front sector distances for artifact filtering
+    current_angle = 0
 
     # Check for obstacles
     for angle, distance in zip(angles, distances):
@@ -135,31 +118,23 @@ def the_callback(angles, distances):
             if distance < SAFE_DISTANCE :
                 FRONT_READINGS += 1
                 if FRONT_READINGS >= MIN_READINGS_FRONT :
-                    front_obstacle_raw = True
+                    set_speed(-20)  # move backward
                     break
 
-    #         # Direction determination: keep the angle of the most distant point
-    #         if distance > MAX_DISTANCE :
-    #             MAX_DISTANCE = distance
-    #             if angle <= math.pi:
-    #                 current_angle = math.degrees(angle)
-    #             else:
-    #                 current_angle = math.degrees(angle - 2*math.pi)  # Convert to negative for left side
+            # Direction determination: keep the angle of the most distant point
+            if distance > MAX_DISTANCE :
+                MAX_DISTANCE = distance
+                if angle <= math.pi:
+                    current_angle = math.degrees(angle)
+                else:
+                    current_angle = math.degrees(angle - 2*math.pi)  # Convert to negative for left side
     
-    # TURN_ANGLE = TURN_ANGLE*0.7 + current_angle*0.3 # exponential filter to smooth direction
-    
+    # Set direction
+    TURN_ANGLE = TURN_ANGLE*0.7 + current_angle*0.3 # exponential filter to smooth direction
     set_steering(TURN_ANGLE)
 
-
-    # Decision making
-    if front_obstacle_raw:
-        set_speed(-20)  # move backward
-        set_steering(TURN_ANGLE)
-
-    else:
-        #print(f"NO obstacle detected : {TURN_ANGLE} deg")
-        #consider the proportionnal speed base on a k ration (speed at 10dm = 1m distance)
-        set_speed(MAX_DISTANCE*K_SPEED/10) #speed depends of max distance
+    # Speed based on a exponential functin that tend to max speed (k_value)
+    set_speed(K_SPEED * (1 - math.exp(-MAX_DISTANCE/STEEPNESS_SPEED)))
         
 
 # ==============================
