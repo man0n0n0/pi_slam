@@ -142,6 +142,7 @@ def the_callback(angles, distances):
     set_steering(TURN_ANGLE)
 
     if FRONT_OBJECT:
+        print(BACKWARD_SPEED)
         set_speed(BACKWARD_SPEED)
     else :
         # Speed based on a exponential functin that tend to max speed (k_value)
