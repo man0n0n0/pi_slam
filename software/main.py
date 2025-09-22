@@ -102,17 +102,15 @@ def the_callback(angles, distances):
     global prevLine, TURN_ANGLE
     # Local variable init
     MAX_DISTANCE = 0
-    front_obstacle_raw = False    # Obstacle avoidance logic
     FRONT_READINGS = 0    # Collect front sector distances for artifact filtering
     current_angle = 0
+    bundaries = [math.pi/6,11*math.pi/6] # to avoid computation in the iterative loop
 
     # Check for obstacles
     for angle, distance in zip(angles, distances):
             
-        # Front sector: 0° ± 30° (considering wraparound) so [11π/6 - 2π] and [0 - π/6] in radians
-        front_condition = (angle<= math.pi/6) or (angle >= 11*math.pi/6)
-        
-        if front_condition and distance < MAX_MESURED_DISTANCE:
+        # Front sector: 0° ± 30° (considering wraparound) so [11π/6 - 2π] and [0 - π/6] in radians        
+        if (angle<= bundaries[0]) or (angle >= bundaries[1]):
 
             # Safety mesure : emergency stop with safe distance
             if distance < SAFE_DISTANCE :
