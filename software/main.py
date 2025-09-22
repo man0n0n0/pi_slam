@@ -74,6 +74,10 @@ def set_steering(angle: float):
 SLOW_DOWN_DISTANCE = 10  # in dm
 SAFE_DISTANCE = 5    # in dm 
 
+MAX_MESURED_DISTANCE = 20   # in dm 
+
+SPEED_RANGE = [25,35]
+
 # Global variables for artifact filtering
 FRONT_DISTANCES = []
 MIN_READINGS_FRONT = 5  # Minimum readings in front sector to be valid
@@ -119,17 +123,9 @@ def the_callback(angles, distances):
         # Or [11π/6 - 2π] and [0 - π/6] in radians
         front_condition = (angle<= math.pi/6) or (angle >= 11*math.pi/6)
         
-        if front_condition:
+        if front_condition and distance < MAX_MESURED_DISTANCE:
 
-            if distance < SAFE_DISTANCE:
-                FRONT_DISTANCES.append(distance)
-                front_obstacle_raw = True
-
-            # value for 
-            if distance < SLOW_DOWN_DISTANCE:
-                slow_down = True
-
-            # Speed is distance dependant 
+            FRONT_DISTANCES.append(distance)
 
             # Direction determination: keep the angle of the most distant point
             if distance > MAX_DISTANCE :
@@ -138,7 +134,7 @@ def the_callback(angles, distances):
                     current_angle = math.degrees(angle)
                 else:
                     current_angle = math.degrees(angle - 2*math.pi)  # Convert to negative for left side
-                TURN_ANGLE = (TURN_ANGLE + current_angle) / 2 # mean function to smooth
+                TURN_ANGLE = TURN_ANGLE*0.7 + current_angle*0.3 # exponential filter to smooth direction
 
     # Artifact filtering for front obstacle detection
     if front_obstacle_raw and len(FRONT_DISTANCES) < MIN_READINGS_FRONT:
@@ -151,14 +147,9 @@ def the_callback(angles, distances):
         set_speed(-5)  # move backward
         set_steering(TURN_ANGLE)
 
-    elif slow_down:
-        #print(f"far front_obstacle : {TURN_ANGLE} deg")
-        set_speed(5)  # move forward
-        set_steering(TURN_ANGLE)
-
     else:
         #print(f"NO obstacle detected : {TURN_ANGLE} deg")
-        set_speed(10)  # move forward
+        set_speed()
         set_steering(TURN_ANGLE)
 
 # ==============================
