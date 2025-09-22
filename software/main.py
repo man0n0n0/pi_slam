@@ -47,38 +47,41 @@ time.sleep(2)
 #     duty_cycle = 7.5 + (speed_percent / 100) * 2.5
 #     esc_pwm.ChangeDutyCycle(duty_cycle)
 
+# Global variable to track current speed
 current_speed = 0
-speed_change_time = 0
-MIN_SPEED_INTERVAL = 0.1  # Minimum time between speed changes
 
-def set_speed(speed_percent: float):
+def set_speed_safe(target_speed):
     """
-    Improved speed setting with rate limiting and proper reverse handling
+    Minimal standard ESC direction change function
     """
-    global current_speed, speed_change_time
+    global current_speed
     
-    current_time = time.time()
+    target_speed = max(-100, min(100, target_speed))  # Clamp to valid range
     
-    # Rate limiting - don't change speed too frequently
-    if current_time - speed_change_time < MIN_SPEED_INTERVAL:
-        return
+    # Check if direction change is needed
+    current_direction = 0 if current_speed == 0 else (1 if current_speed > 0 else -1)
+    target_direction = 0 if target_speed == 0 else (1 if target_speed > 0 else -1)
     
-    speed_percent = max(-100, min(100, speed_percent))  # clamp
-    
-    # If changing direction (crossing zero), pause at neutral first
-    if (current_speed > 0 and speed_percent < 0) or (current_speed < 0 and speed_percent > 0):
-        print(f"Direction change: {current_speed} -> {speed_percent}, pausing at neutral")
+    # If changing from forward to reverse, use proper sequence
+    if current_direction == 1 and target_direction == -1:
+        print("Forward->Reverse sequence")
+        esc_pwm.ChangeDutyCycle(7.5)  # Stop
+        time.sleep(0.5)               # Wait
+        esc_pwm.ChangeDutyCycle(5.0)  # Brief brake pulse
+        time.sleep(0.1)
         esc_pwm.ChangeDutyCycle(7.5)  # Neutral
-        time.sleep(0.2)  # Brief pause for ESC to register
+        time.sleep(0.2)
     
-    # Convert percentage to duty cycle
-    duty_cycle = 7.5 + (speed_percent / 100) * 2.5
+    # If changing from reverse to forward, stop first
+    elif current_direction == -1 and target_direction == 1:
+        print("Reverse->Forward sequence") 
+        esc_pwm.ChangeDutyCycle(7.5)  # Stop
+        time.sleep(0.3)
+    
+    # Apply target speed
+    duty_cycle = 7.5 + (target_speed / 100) * 2.5
     esc_pwm.ChangeDutyCycle(duty_cycle)
-    
-    current_speed = speed_percent
-    speed_change_time = current_time
-    
-    print(f"Speed set to: {speed_percent}% (duty: {duty_cycle}%)")
+    current_speed = target_speed
 
 def set_steering(angle: float):
     """
