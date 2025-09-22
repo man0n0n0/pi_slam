@@ -46,6 +46,7 @@ time.sleep(2)
 #     # Neutral at 7.5%, full forward at 10%, full reverse at 5%
 #     duty_cycle = 7.5 + (speed_percent / 100) * 2.5
 #     esc_pwm.ChangeDutyCycle(duty_cycle)
+
 current_speed = 0
 speed_change_time = 0
 MIN_SPEED_INTERVAL = 0.1  # Minimum time between speed changes
@@ -78,6 +79,24 @@ def set_speed(speed_percent: float):
     speed_change_time = current_time
     
     print(f"Speed set to: {speed_percent}% (duty: {duty_cycle}%)")
+
+def set_steering(angle: float):
+    """
+    Set steering angle using servo motor.
+    :param angle: -90 (full left) to 90 (full right)
+    """
+    angle = max(-45, min(45, angle)) * -1 # clamp and revert
+
+    # Convert angle to pulse width (1.0ms to 2.0ms)
+    # Formula: pulse_width = 1.5ms + (angle/90) * 0.5ms
+    pulse_width_ms = 1.5 + (angle / 45.0) * 0.5
+    
+    # Convert pulse width to duty cycle percentage
+    # Duty cycle = (pulse_width / period) * 100
+    # Period = 20ms for 50Hz
+    duty_cycle = (pulse_width_ms / 20.0) * 100.0
+
+    servo_pwm.ChangeDutyCycle(duty_cycle)
 
 
 # ==============================
