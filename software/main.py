@@ -50,7 +50,7 @@ time.sleep(2)
 # Global variable to track current speed
 current_speed = 0
 
-def set_speed_safe(target_speed):
+def set_speed(target_speed):
     """
     Minimal standard ESC direction change function
     """
