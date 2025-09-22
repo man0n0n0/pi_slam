@@ -111,33 +111,38 @@ def the_callback(angles, distances):
     
     # Collect front sector distances for artifact filtering
     FRONT_DISTANCES = []
-    
     MAX_DISTANCE = 0
     TURN_ANGLE = 0
 
-    # Check for obstacles
-    for angle, distance in zip(angles, distances):
-            
-        # Front sector: 0° ± 30° (considering wraparound)
-        # This covers [330°-360°] and [0°-30°] in degrees
-        # Or [11π/6 - 2π] and [0 - π/6] in radians
-        front_condition = (angle<= math.pi/6) or (angle >= 11*math.pi/6)
+    # Create boolean masks for all conditions at once
+    front_mask = (angles <= math.pi/6) | (angles >= 11*math.pi/6)
+    valid_mask = distances < MAX_MESURED_DISTANCE
+    combined_mask = front_mask & valid_mask
+
+    # Extract all valid front distances in one operation
+    FRONT_DISTANCES = distances[combined_mask].tolist()  # Convert back to list if needed
+
+    # Find maximum distance and its corresponding angle
+    if np.any(combined_mask):
+        valid_distances = distances[combined_mask]
+        valid_angles = angles[combined_mask]
         
-        if front_condition and distance < MAX_MESURED_DISTANCE:
-
-            FRONT_DISTANCES.append(distance)
-
-            # Direction determination: keep the angle of the most distant point
-            if distance > MAX_DISTANCE :
-                MAX_DISTANCE = distance
-                if angle <= math.pi:
-                    current_angle = math.degrees(angle)
-                else:
-                    current_angle = math.degrees(angle - 2*math.pi)  # Convert to negative for left side
-                TURN_ANGLE = TURN_ANGLE*0.7 + current_angle*0.3 # exponential filter to smooth direction
+        # Find index of maximum distance
+        max_idx = np.argmax(valid_distances)
+        MAX_DISTANCE = valid_distances[max_idx]
+        max_angle = valid_angles[max_idx]
+        
+        # Angle conversion (vectorized for the selected angle)
+        if max_angle <= math.pi:
+            current_angle = math.degrees(max_angle)
+        else:
+            current_angle = math.degrees(max_angle - 2*math.pi)
+        
+        # Exponential filter
+        TURN_ANGLE = TURN_ANGLE * 0.7 + current_angle * 0.3
 
     # Artifact filtering for front obstacle detection
-    if front_obstacle_raw and len(FRONT_DISTANCES) < MIN_READINGS_FRONT:
+    if front_obstacle_raw and np.sum(combined_mask) < MIN_READINGS_FRONT:
         # Not enough readings in front sector - likely artifact
         front_obstacle_raw = False
     
