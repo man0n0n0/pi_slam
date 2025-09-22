@@ -73,7 +73,7 @@ def set_steering(angle: float):
 # ==============================
 SAFE_DISTANCE = 5    # in dm 
 MAX_MESURED_DISTANCE = 40   # in dm 
-K_SPEED = 20 # max speed for exponential function
+K_SPEED = 40 # max speed for exponential function
 STEEPNESS_SPEED = 5 # Smaller steepness (e.g., 5) = faster acceleration, reaches max speed sooner // larger steepness gentler acceleration, more gradual speed increase
 MIN_READINGS_FRONT = 5  # Minimum readings in front sector to be valid ([# )Global variables for artifact filtering)
 
@@ -116,7 +116,7 @@ def the_callback(angles, distances):
             if distance < SAFE_DISTANCE :
                 FRONT_READINGS += 1
                 if FRONT_READINGS >= MIN_READINGS_FRONT :
-                    set_speed(-20)  # move backward
+                    set_speed(-30)  # move backward
                     break
 
             # Direction determination: keep the angle of the most distant point
