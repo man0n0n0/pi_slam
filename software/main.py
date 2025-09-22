@@ -142,7 +142,6 @@ def the_callback(angles, distances):
 
     if FRONT_OBJECT:
         set_speed(BACKWARD_SPEED)
-        time.sleep(0.1)
     else :
         # Speed based on a exponential functin that tend to max speed (k_value)
         set_speed(K_SPEED * (1 - math.exp(-MAX_DISTANCE/STEEPNESS_SPEED)))
