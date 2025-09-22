@@ -175,7 +175,7 @@ def the_callback(angles, distances):
     
     # Simple escape logic
     if FRONT_OBJECT:
-        ignore_obstacle_until = current_time + IGNORE_DURATION
+        ignore_obstacle_until = time.time() + IGNORE_DURATION
 
         # Turn toward clearest side
         if left_clear_count > right_clear_count:
