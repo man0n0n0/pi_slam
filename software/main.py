@@ -123,7 +123,7 @@ def the_callback(angles, distances):
                     FRONT_OBJECT = True
 
             # Direction determination: keep the angle of the most distant point
-            elif distance > MAX_DISTANCE :
+            if distance > MAX_DISTANCE :
                 MAX_DISTANCE = distance
                 current_steering_angle = angle
 
@@ -138,7 +138,7 @@ def the_callback(angles, distances):
         
         # exponential filter to smooth direction
         TURN_ANGLE = TURN_ANGLE*0.7 + current_steering_angle*0.3
-        
+
     print(TURN_ANGLE)
     set_steering(TURN_ANGLE)
 
