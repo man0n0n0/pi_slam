@@ -71,15 +71,12 @@ def set_steering(angle: float):
 # ==============================
 # Obstacle Avoidance Parameters
 # ==============================
-SLOW_DOWN_DISTANCE = 10  # in dm
 SAFE_DISTANCE = 5    # in dm 
+MAX_MESURED_DISTANCE = 40   # in dm 
 
-MAX_MESURED_DISTANCE = 20   # in dm 
-
-SPEED_RANGE = [25,35]
+K_SPEED = 30 # proportional quotient (speed for 1m distance object)
 
 # Global variables for artifact filtering
-FRONT_DISTANCES = []
 MIN_READINGS_FRONT = 5  # Minimum readings in front sector to be valid
 
 # ==============================
@@ -103,58 +100,54 @@ prevLine = None
 # Callback for Processing LiDAR Data
 # ==============================
 def the_callback(angles, distances):
-    global prevLine, FRONT_DISTANCES
+    global prevLine
     
     # Obstacle avoidance logic
     front_obstacle_raw = False
-    slow_down = False
     
     # Collect front sector distances for artifact filtering
-    FRONT_DISTANCES = []
+    FRONT_READINGS = []
+
+    # Local variable init
     MAX_DISTANCE = 0
     TURN_ANGLE = 0
 
-    # Create boolean masks for all conditions at once
-    front_mask = (angles <= math.pi/6) | (angles >= 11*math.pi/6)
-    valid_mask = distances < MAX_MESURED_DISTANCE
-    combined_mask = front_mask & valid_mask
 
-    # Extract all valid front distances in one operation
-    FRONT_DISTANCES = distances[combined_mask].tolist()  # Convert back to list if needed
+    print(zip(angles, distances))
+    
+    # Check for obstacles
+    for angle, distance in zip(angles, distances):
+            
+        # Front sector: 0° ± 30° (considering wraparound) so [11π/6 - 2π] and [0 - π/6] in radians
+        front_condition = (angle<= math.pi/6) or (angle >= 11*math.pi/6)
+        
+        if front_condition and distance < MAX_MESURED_DISTANCE:
 
-    # Find maximum distance and its corresponding angle
-    if np.any(combined_mask):
-        valid_distances = distances[combined_mask]
-        valid_angles = angles[combined_mask]
-        
-        # Find index of maximum distance
-        max_idx = np.argmax(valid_distances)
-        MAX_DISTANCE = valid_distances[max_idx]
-        max_angle = valid_angles[max_idx]
-        
-        # Angle conversion (vectorized for the selected angle)
-        if max_angle <= math.pi:
-            current_angle = math.degrees(max_angle)
-        else:
-            current_angle = math.degrees(max_angle - 2*math.pi)
-        
-        # Exponential filter
-        TURN_ANGLE = TURN_ANGLE * 0.7 + current_angle * 0.3
+            # Safety mesure : emergency stop with safe distance
+            if distance < SAFE_DISTANCE :
+                FRONT_READINGS += 1
+                if FRONT_READINGS >= MIN_READINGS_FRONT :
+                    front_obstacle_raw = True
+                    break
 
-    # Artifact filtering for front obstacle detection
-    if front_obstacle_raw and np.sum(combined_mask) < MIN_READINGS_FRONT:
-        # Not enough readings in front sector - likely artifact
-        front_obstacle_raw = False
+            # Direction determination: keep the angle of the most distant point
+            if distance > MAX_DISTANCE :
+                MAX_DISTANCE = distance
+                if angle <= math.pi:
+                    current_angle = math.degrees(angle)
+                else:
+                    current_angle = math.degrees(angle - 2*math.pi)  # Convert to negative for left side
+                TURN_ANGLE = TURN_ANGLE*0.7 + current_angle*0.3 # exponential filter to smooth direction
     
     # Decision making
     if front_obstacle_raw:
-        #set_speed(-30)  # move backward
-        set_speed(-5)  # move backward
+        set_speed(-20)  # move backward
         set_steering(TURN_ANGLE)
 
     else:
         #print(f"NO obstacle detected : {TURN_ANGLE} deg")
-        set_speed(5)
+        #consider the proportionnal speed base on a k ration (speed at 10dm = 1m distance)
+        set_speed(MAX_DISTANCE*K_SPEED/10) #speed depends of max distance
         set_steering(TURN_ANGLE)
 
 # ==============================
