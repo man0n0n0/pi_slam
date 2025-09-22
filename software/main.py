@@ -71,9 +71,9 @@ def set_steering(angle: float):
 # ==============================
 # Obstacle Avoidance Parameters
 # ==============================
-SAFE_DISTANCE = 5    # in dm 
+SAFE_DISTANCE = 7   # in dm 
 MAX_MESURED_DISTANCE = 40   # in dm 
-K_SPEED = 40 # max speed for exponential function
+K_SPEED = 30 # max speed for exponential function
 BACKWARD_SPEED = -40
 STEEPNESS_SPEED = 10 # Smaller steepness (e.g., 5) = faster acceleration, reaches max speed sooner // larger steepness gentler acceleration, more gradual speed increase
 MIN_READINGS_FRONT = 15  # Minimum readings in front sector to be valid ([# )Global variables for artifact filtering)
@@ -143,6 +143,7 @@ def the_callback(angles, distances):
 
     if FRONT_OBJECT:
         set_speed(BACKWARD_SPEED)
+        time.sleep(0.1)
     else :
         # Speed based on a exponential functin that tend to max speed (k_value)
         set_speed(K_SPEED * (1 - math.exp(-MAX_DISTANCE/STEEPNESS_SPEED)))
