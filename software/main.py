@@ -4,8 +4,6 @@ import time
 import matplotlib.pyplot as plt
 import RPi.GPIO as GPIO
 from CalcLidarData import CalcLidarData
-
-
 # ==============================
 # GPIO Setup
 # ==============================
@@ -109,6 +107,7 @@ BACKWARD_SPEED = -20
 STEEPNESS_SPEED = 10 # Smaller steepness (e.g., 5) = faster acceleration, reaches max speed sooner // larger steepness gentler acceleration, more gradual speed increase
 MIN_READINGS_FRONT = 30  # Minimum readings in front sector to be valid ([# )Global variables for artifact filtering)
 
+REVERSE_TIME = 2.0  # Reverse for 2 seconds before trying sides
 # ==============================
 # Serial Connection to LiDAR
 # ==============================
@@ -125,6 +124,7 @@ tmpString = ""
 angles = []
 distances = []
 TURN_ANGLE = 0
+obstacle_start_time = 0
 prevLine = None
 
 # ==============================
