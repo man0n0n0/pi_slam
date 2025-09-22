@@ -27,10 +27,10 @@ esc_pwm = GPIO.PWM(ESC_PIN, 50)      # 50Hz for ESC
 # Start PWM with neutral signals
 servo_pwm.start(7.5)  # Neutral position for servo (90 degrees)
 esc_pwm.start(7.5)    # Neutral position for ESC (stop)
-esc_pwm.ChangeDutyCycle(5.0)    # Send minimum throttle
-time.sleep(2)
-esc_pwm.ChangeDutyCycle(7.5)    # Move to neutral
-time.sleep(2)
+# esc_pwm.ChangeDutyCycle(5.0)    # Send minimum throttle
+# time.sleep(2)
+# esc_pwm.ChangeDutyCycle(7.5)    # Move to neutral
+# time.sleep(2)
 
 
 # ==============================
@@ -106,6 +106,7 @@ def the_callback(angles, distances):
     FRONT_READINGS = 0    # Collect front sector distances for artifact filtering
     FRONT_OBJECT = False
     current_steering_angle = 0
+    
     #bundaries = [math.pi/6,11*math.pi/6] # +- 30deg to avoid computation in the iterative loop
     boundaries = [math.pi/4, 7*math.pi/4]  # ±45° (45° and 315°)
 
@@ -117,7 +118,7 @@ def the_callback(angles, distances):
 
             # Safety mesure : emergency stop with safe distance
             if distance < SAFE_DISTANCE :
-                FRONT_READINGS += 1
+                FRONT_READINGS += 1 #to avoid artifacts
                 if FRONT_READINGS >= MIN_READINGS_FRONT :
                     FRONT_OBJECT = True
                     break
