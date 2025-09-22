@@ -47,18 +47,42 @@ time.sleep(2)
 #     duty_cycle = 7.5 + (speed_percent / 100) * 2.5
 #     esc_pwm.ChangeDutyCycle(duty_cycle)
 current_speed = 0
-def set_speed(speed_percent: float):
+# def set_speed(speed_percent: float):
+#     global current_speed
+#     speed_percent = max(-100, min(100, speed_percent))
+    
+#     # If changing direction, pause at neutral first
+#     if (current_speed > 0 and speed_percent < 0) or (current_speed < 0 and speed_percent > 0):
+#         esc_pwm.ChangeDutyCycle(7.5)  # Neutral
+#         time.sleep(0.2)
+    
+#     duty_cycle = 7.5 + (speed_percent / 100) * 2.5
+#     esc_pwm.ChangeDutyCycle(duty_cycle)
+#     current_speed = speed_percent
+
+
+    def set_speed(target_speed: float, step_size: float = 5.0):
+    """
+    Gradually change speed to avoid shocking the ESC
+    """
     global current_speed
-    speed_percent = max(-100, min(100, speed_percent))
     
-    # If changing direction, pause at neutral first
-    if (current_speed > 0 and speed_percent < 0) or (current_speed < 0 and speed_percent > 0):
-        esc_pwm.ChangeDutyCycle(7.5)  # Neutral
-        time.sleep(0.2)
+    target_speed = max(-100, min(100, target_speed))
     
-    duty_cycle = 7.5 + (speed_percent / 100) * 2.5
+    while abs(current_speed - target_speed) > step_size:
+        if current_speed < target_speed:
+            current_speed += step_size
+        else:
+            current_speed -= step_size
+            
+        duty_cycle = 7.5 + (current_speed / 100) * 2.5
+        esc_pwm.ChangeDutyCycle(duty_cycle)
+        time.sleep(0.05)  # Small delay between steps
+    
+    # Final adjustment
+    current_speed = target_speed
+    duty_cycle = 7.5 + (current_speed / 100) * 2.5
     esc_pwm.ChangeDutyCycle(duty_cycle)
-    current_speed = speed_percent
 
 def set_steering(angle: float):
     """
