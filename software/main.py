@@ -26,15 +26,14 @@ esc_pwm = GPIO.PWM(ESC_PIN, 50)      # 50Hz for ESC
 
 # Start PWM with neutral signals
 servo_pwm.start(7.5)  # Neutral position for servo (90 degrees)
+esc_pwm.start(7.5)    # Neutral position for ESC (stop)
+esc_pwm.ChangeDutyCycle(5.0)    # Send minimum throttle
+time.sleep(2)
+esc_pwm.ChangeDutyCycle(7.5)    # Move to neutral
+time.sleep(2)
 
-esc_pwm.ChangeDutyCycle(7.5)   # Neutral
-time.sleep(2)
-# Step 2: Send maximum reverse signal  
-esc_pwm.ChangeDutyCycle(5.0)   # Max reverse
-time.sleep(2)
-# Step 3: Return to neutral
-esc_pwm.ChangeDutyCycle(7.5)   # Neutral
-time.sleep(2)
+
+
 
 
 # ==============================
