@@ -47,60 +47,37 @@ time.sleep(2)
 #     duty_cycle = 7.5 + (speed_percent / 100) * 2.5
 #     esc_pwm.ChangeDutyCycle(duty_cycle)
 current_speed = 0
-# def set_speed(speed_percent: float):
-#     global current_speed
-#     speed_percent = max(-100, min(100, speed_percent))
-    
-#     # If changing direction, pause at neutral first
-#     if (current_speed > 0 and speed_percent < 0) or (current_speed < 0 and speed_percent > 0):
-#         esc_pwm.ChangeDutyCycle(7.5)  # Neutral
-#         time.sleep(0.2)
-    
-#     duty_cycle = 7.5 + (speed_percent / 100) * 2.5
-#     esc_pwm.ChangeDutyCycle(duty_cycle)
-#     current_speed = speed_percent
+speed_change_time = 0
+MIN_SPEED_INTERVAL = 0.1  # Minimum time between speed changes
 
-
-def set_speed(target_speed: float, step_size: float = 5.0):
+def set_speed(speed_percent: float):
     """
-    Gradually change speed to avoid shocking the ESC
+    Improved speed setting with rate limiting and proper reverse handling
     """
-    global current_speed
-
-    target_speed = max(-100, min(100, target_speed))
-
-    while abs(current_speed - target_speed) > step_size:
-        if current_speed < target_speed:
-            current_speed += step_size
-        else:
-            current_speed -= step_size
-            
-        duty_cycle = 7.5 + (current_speed / 100) * 2.5
-        esc_pwm.ChangeDutyCycle(duty_cycle)
-        time.sleep(0.05)  # Small delay between steps
-
-    # Final adjustment
-    current_speed = target_speed
-    duty_cycle = 7.5 + (current_speed / 100) * 2.5
+    global current_speed, speed_change_time
+    
+    current_time = time.time()
+    
+    # Rate limiting - don't change speed too frequently
+    if current_time - speed_change_time < MIN_SPEED_INTERVAL:
+        return
+    
+    speed_percent = max(-100, min(100, speed_percent))  # clamp
+    
+    # If changing direction (crossing zero), pause at neutral first
+    if (current_speed > 0 and speed_percent < 0) or (current_speed < 0 and speed_percent > 0):
+        print(f"Direction change: {current_speed} -> {speed_percent}, pausing at neutral")
+        esc_pwm.ChangeDutyCycle(7.5)  # Neutral
+        time.sleep(0.2)  # Brief pause for ESC to register
+    
+    # Convert percentage to duty cycle
+    duty_cycle = 7.5 + (speed_percent / 100) * 2.5
     esc_pwm.ChangeDutyCycle(duty_cycle)
-
-def set_steering(angle: float):
-    """
-    Set steering angle using servo motor.
-    :param angle: -90 (full left) to 90 (full right)
-    """
-    angle = max(-45, min(45, angle)) * -1 # clamp and revert
-
-    # Convert angle to pulse width (1.0ms to 2.0ms)
-    # Formula: pulse_width = 1.5ms + (angle/90) * 0.5ms
-    pulse_width_ms = 1.5 + (angle / 45.0) * 0.5
     
-    # Convert pulse width to duty cycle percentage
-    # Duty cycle = (pulse_width / period) * 100
-    # Period = 20ms for 50Hz
-    duty_cycle = (pulse_width_ms / 20.0) * 100.0
-
-    servo_pwm.ChangeDutyCycle(duty_cycle)
+    current_speed = speed_percent
+    speed_change_time = current_time
+    
+    print(f"Speed set to: {speed_percent}% (duty: {duty_cycle}%)")
 
 
 # ==============================
