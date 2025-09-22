@@ -113,13 +113,9 @@ def the_callback(angles, distances):
             farthest_angle = angle
             farthest_index = i
     
-    return {
-        'distance': max_distance,
-        'angle': farthest_angle,
-        'angle_degrees': math.degrees(farthest_angle),
-        'index': farthest_index
-    }
-##################
+    print(f'distance{max_distance}angle_degrees{math.degrees(farthest_angle)}')
+
+    ##################
 
     global prevLine, TURN_ANGLE
     # Local variable init
