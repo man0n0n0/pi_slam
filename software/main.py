@@ -29,8 +29,9 @@ servo_pwm.start(7.5)  # Neutral position for servo (90 degrees)
 esc_pwm.start(7.5)    # Neutral position for ESC (stop)
 esc_pwm.ChangeDutyCycle(5.0)    # Send minimum throttle
 time.sleep(2)
-esc_pwm.ChangeDutyCycle(7.5)    # Move to neutral
-time.sleep(2)
+# esc_pwm.ChangeDutyCycle(7.5)    # Move to neutral
+# time.sleep(2)
+# esc_pwm.ChangeDutyCycle(5.0)    # Send minimum throttle
 
 # ==============================
 # Motor Control Functions
@@ -49,7 +50,6 @@ time.sleep(2)
 
 # Global variable to track current speed
 current_speed = 0
-
 def set_speed(target_speed):
     """
     Minimal standard ESC direction change function
@@ -64,7 +64,6 @@ def set_speed(target_speed):
     
     # If changing from forward to reverse, use proper sequence
     if current_direction == 1 and target_direction == -1:
-        print("Forward->Reverse sequence")
         esc_pwm.ChangeDutyCycle(7.5)  # Stop
         time.sleep(0.5)               # Wait
         esc_pwm.ChangeDutyCycle(5.0)  # Brief brake pulse
@@ -74,7 +73,6 @@ def set_speed(target_speed):
     
     # If changing from reverse to forward, stop first
     elif current_direction == -1 and target_direction == 1:
-        print("Reverse->Forward sequence") 
         esc_pwm.ChangeDutyCycle(7.5)  # Stop
         time.sleep(0.3)
     
