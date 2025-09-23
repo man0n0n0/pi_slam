@@ -104,6 +104,7 @@ def set_steering(angle: float):
 SAFE_DISTANCE = 10   # (dm) area in with point are detected as obstacle 
 MIN_READINGS_FRONT = 30  # Minimum readings in front sector to be valid ([# )Global variables for artifact filtering)
 K_SPEED = 30 # max speed for exponential function
+K_BACk_SPEED = 15
 STEEPNESS_SPEED = 10 # Smaller steepness (e.g., 5) = faster acceleration, reaches max speed sooner // larger steepness gentler acceleration, more gradual speed increase
 
 IGNORE_DURATION = 2.0 # for backward control
@@ -158,7 +159,6 @@ def the_callback(angles, distances):
         elif FRONT_OBJECT and (angle <= back_boundaries[1]) or (angle >= back_boundaries[0]):
             # Deduce the backward direction (cape)
              if distance > BACK_MAX_DISTANCE:
-                print(distance)
                 BACK_MAX_DISTANCE = distance
                 current_back_steering_angle = angle
     
@@ -175,8 +175,8 @@ def the_callback(angles, distances):
 
     # Set speed & simple escape logic
     if FRONT_OBJECT:
-        print(-K_SPEED * (1 - math.exp(-BACK_MAX_DISTANCE/STEEPNESS_SPEED)))
-        set_speed(-K_SPEED * (1 - math.exp(-BACK_MAX_DISTANCE/STEEPNESS_SPEED))) # Reverse
+        print(-K_BACK_SPEED * (1 - math.exp(-BACK_MAX_DISTANCE/STEEPNESS_SPEED)))
+        set_speed(-K_BACK_SPEED * (1 - math.exp(-BACK_MAX_DISTANCE/STEEPNESS_SPEED))) # Reverse
     else:
         set_speed(K_SPEED * (1 - math.exp(-MAX_DISTANCE/STEEPNESS_SPEED)))
 
