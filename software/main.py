@@ -127,6 +127,7 @@ def the_callback(angles, distances):
     MAX_DISTANCE = 0
     BACK_MAX_DISTANCE = 0
     SAFE_READINGS = 0
+    CLOSE_READINGS = 0
     CLOSE_OBJECT = False
     current_steering_angle = None
     front_boundaries = [math.pi/4, 7*math.pi/4]
