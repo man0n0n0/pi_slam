@@ -124,7 +124,6 @@ tmpString = ""
 angles = []
 distances = []
 TURN_ANGLE = 0
-obstacle_start_time = 0
 ignore_obstacle_until = 0
 prevLine = None
 
@@ -136,57 +135,50 @@ def the_callback(angles, distances):
     
     # Your existing obstacle detection code here...
     MAX_DISTANCE = 0
+    BACK_MAX_DISTANCE = 0
+
     FRONT_READINGS = 0
     FRONT_OBJECT = False
     current_steering_angle = None
-    boundaries = [math.pi/4, 7*math.pi/4]
-    
-    # Check front + count left/right clear readings
-    left_clear_count = 0
-    right_clear_count = 0
+    current_back_steering_angle = None
+    front_boundaries = [math.pi/4, 7*math.pi/4]
+    back_boundaries = [3math.pi/4, 5*math.pi/4]
 
-    # To ensure backward for 
-    if time.time() < ignore_obstacle_until:
-        set_speed(BACKWARD_SPEED)
-        return
-    
     for angle, distance in zip(angles, distances):
-        if (angle <= boundaries[0]) or (angle >= boundaries[1]):
-            # Front detection (your existing code)
+        if (angle <= front_boundaries[0]) or (angle >= front_boundaries[1]):
+            # Front detection 
             if distance < SAFE_DISTANCE:
                 FRONT_READINGS += 1
                 if FRONT_READINGS >= MIN_READINGS_FRONT:
-                    FRONT_OBJECT = True
-            if distance > MAX_DISTANCE:
+                    FRONT_OBJECT = True # there is a obstacle
+
+            # Deduce front direction
+            if not FRONT_OBJECT and distance > MAX_DISTANCE:
                 MAX_DISTANCE = distance
                 current_steering_angle = angle
-        else:
-            # Count clear space on sides
-            if distance > SAFE_DISTANCE * 1.5:
-                if math.pi/2 <= angle <= math.pi:      # Left
-                    left_clear_count += 1
-                elif math.pi <= angle <= 3*math.pi/2:  # Right  
-                    right_clear_count += 1
+
+        elif FRONT_OBJECT and (angle <= back_boundaries[1]) or (angle >= back_boundaries[0])::
+            # Deduce the backward direction (cape)
+             if back_distance > BACK_MAX_DISTANCE:
+                BACK_MAX_DISTANCE = distance
+                back_current_back_steering_angle = angle
     
     # Update steering
-    if current_steering_angle is not None:
+    if not FRONT_OBJECT and current_steering_angle is not None:
         steering_degrees = math.degrees(current_steering_angle) if current_steering_angle <= math.pi else math.degrees(current_steering_angle - 2*math.pi)
         TURN_ANGLE = TURN_ANGLE*0.7 + steering_degrees*0.3
-    
+
+    if FRONT_OBJECT and current_back_steering_angle is not None:
+        steering_degrees = math.degrees(current_back_steering_angle) if current_back_steering_angle <= math.pi else math.degrees(current_back_steering_angle - 2*math.pi)
+        TURN_ANGLE = TURN_ANGLE*0.7 + steering_degrees*0.3
+
+    set_steering(TURN_ANGLE)
+
     # Simple escape logic
     if FRONT_OBJECT:
-        ignore_obstacle_until = time.time() + IGNORE_DURATION
-
-        # Turn toward clearest side
-        if left_clear_count > right_clear_count:
-            set_steering(-25)  # Turn left
-        else:
-            set_steering(25)   # Turn right
-        set_speed(BACKWARD_SPEED)  # Reverse
+        set_speed(K_SPEED * (1 - math.exp(-BACK_MAX_DISTANCE/STEEPNESS_SPEED))) # Reverse
 
     else:
-        obstacle_start_time = 0  # Reset
-        set_steering(TURN_ANGLE)
         set_speed(K_SPEED * (1 - math.exp(-MAX_DISTANCE/STEEPNESS_SPEED)))
 
         
