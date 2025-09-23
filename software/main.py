@@ -34,18 +34,6 @@ esc_pwm.ChangeDutyCycle(7.5)    # Move to neutral
 # ==============================
 # Motor Control Functions
 # ==============================
-# def set_speed(speed_percent: float):
-#     """
-#     Set robot speed using PWM ESC.
-#     :param speed_percent: -100 (full reverse) to 100 (full forward)
-#     """
-#     speed_percent = max(-100, min(100, speed_percent))  # clamp
-
-#     # Convert percentage to duty cycle (typically 5-10% for ESCs)
-#     # Neutral at 7.5%, full forward at 10%, full reverse at 5%
-#     duty_cycle = 7.5 + (speed_percent / 100) * 2.5
-#     esc_pwm.ChangeDutyCycle(duty_cycle)
-
 # Global variable to track current speed
 current_speed = 0
 def set_speed(target_speed):
@@ -177,7 +165,9 @@ def the_callback(angles, distances):
     # Set speed & simple escape logic
     if FRONT_OBJECT:
         set_speed(K_BACK_SPEED * (1 - math.exp(-BACK_MAX_DISTANCE/STEEPNESS_SPEED))) # Reverse
-        time.sleep(0.5)
+        set_speed(K_BACK_SPEED * (1 - math.exp(-BACK_MAX_DISTANCE/STEEPNESS_SPEED))) # Reverse
+        set_speed(K_BACK_SPEED * (1 - math.exp(-BACK_MAX_DISTANCE/STEEPNESS_SPEED))) # Reverse
+
     else:
         set_speed(K_SPEED * (1 - math.exp(-MAX_DISTANCE/STEEPNESS_SPEED)))
 
