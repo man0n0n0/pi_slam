@@ -159,9 +159,9 @@ def the_callback(angles, distances):
 
         elif FRONT_OBJECT and (angle <= back_boundaries[1]) or (angle >= back_boundaries[0]):
             # Deduce the backward direction (cape)
-             if back_distance > BACK_MAX_DISTANCE:
+             if distance > BACK_MAX_DISTANCE:
                 BACK_MAX_DISTANCE = distance
-                back_current_back_steering_angle = angle
+                current_back_steering_angle = angle
     
     # Update steering
     if not FRONT_OBJECT and current_steering_angle is not None:
