@@ -28,8 +28,7 @@ esc_pwm.start(7.5)    # Neutral position for ESC (stop)
 esc_pwm.ChangeDutyCycle(5.0)    # Send minimum throttle
 time.sleep(2)
 esc_pwm.ChangeDutyCycle(7.5)    # Move to neutral
-# time.sleep(2)
-# esc_pwm.ChangeDutyCycle(5.0)    # Send minimum throttle
+
 
 # ==============================
 # Motor Control Functions
@@ -90,7 +89,7 @@ def set_steering(angle: float):
 # ==============================
 # Obstacle Avoidance Parameters
 # ==============================
-SAFE_DISTANCE = 10   # (dm) area in with point are detected as obstacle 
+SAFE_DISTANCE_INI = 7   # (dm) area in with point are detected as obstacle (value at init)
 MIN_READINGS_FRONT = 30  # Minimum readings in front sector to be valid ([# )Global variables for artifact filtering)
 K_SPEED = 30 # max speed for exponential function
 K_BACK_SPEED = 30
@@ -113,6 +112,8 @@ tmpString = ""
 angles = []
 distances = []
 TURN_ANGLE = 0
+CLOSEST_OBSTACLE_ANGLE = None
+SAFE_DISTANCE = SAFE_DISTANCE_INI
 ignore_obstacle_until = 0
 prevLine = None
 
@@ -120,7 +121,7 @@ prevLine = None
 # Callback for Processing LiDAR Data
 # ==============================
 def the_callback(angles, distances):
-    global prevLine, TURN_ANGLE, obstacle_start_time, ignore_obstacle_until
+    global prevLine, TURN_ANGLE, obstacle_start_time, CLOSEST_OBSTACLE_ANGLE
     
     # Init callback variables
     MAX_DISTANCE = 0
@@ -133,20 +134,24 @@ def the_callback(angles, distances):
     back_boundaries = [3*math.pi/4, 5*math.pi/4]
 
     for angle, distance in zip(angles, distances):
+        # Front detection (front range)
         if (angle <= front_boundaries[0]) or (angle >= front_boundaries[1]):
-            # Front detection 
+            # Deduce front obstacle via the cluster size to avoid (artifacts)
             if distance < SAFE_DISTANCE:
                 FRONT_READINGS += 1
                 if FRONT_READINGS >= MIN_READINGS_FRONT:
-                    FRONT_OBJECT = True # there is a obstacle
+                    FRONT_OBJECT = True # Obstacle detected
+
+            # Get the angle of the closest point (TO TRY)
 
             # Deduce front direction
             if not FRONT_OBJECT and distance > MAX_DISTANCE:
                 MAX_DISTANCE = distance
                 current_steering_angle = angle
 
+        # Backward detection (front range)
         elif FRONT_OBJECT and (angle <= back_boundaries[1]) or (angle >= back_boundaries[0]):
-            # Deduce the backward direction (cape)
+            # Deduce the backward direction
              if distance > BACK_MAX_DISTANCE:
                 BACK_MAX_DISTANCE = distance
                 current_back_steering_angle = angle
@@ -164,11 +169,11 @@ def the_callback(angles, distances):
 
     # Set speed & simple escape logic
     if FRONT_OBJECT:
-        set_speed(-K_BACK_SPEED * (1 - math.exp(-BACK_MAX_DISTANCE/STEEPNESS_SPEED))) # Reverse
-        set_speed(-K_BACK_SPEED * (1 - math.exp(-BACK_MAX_DISTANCE/STEEPNESS_SPEED))) # Reverse
+        SAFE_DISTANCE -= 0.1 #as long at it as a front object as much the distance decrease
         set_speed(-K_BACK_SPEED * (1 - math.exp(-BACK_MAX_DISTANCE/STEEPNESS_SPEED))) # Reverse
 
     else:
+        SAFE_DISTANCE = SAFE_DISTANCE_INI
         set_speed(K_SPEED * (1 - math.exp(-MAX_DISTANCE/STEEPNESS_SPEED)))
 
         
