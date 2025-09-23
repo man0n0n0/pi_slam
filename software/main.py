@@ -121,7 +121,7 @@ prevLine = None
 # Callback for Processing LiDAR Data
 # ==============================
 def the_callback(angles, distances):
-    global prevLine, TURN_ANGLE, obstacle_start_time, CLOSEST_OBSTACLE_ANGLE
+    global prevLine, TURN_ANGLE, obstacle_start_time, CLOSEST_OBSTACLE_ANGLE, SAFE_DISTANCE
     
     # Init callback variables
     MAX_DISTANCE = 0
