@@ -158,6 +158,7 @@ def the_callback(angles, distances):
         elif FRONT_OBJECT and (angle <= back_boundaries[1]) or (angle >= back_boundaries[0]):
             # Deduce the backward direction (cape)
              if distance > BACK_MAX_DISTANCE:
+                print(distance)
                 BACK_MAX_DISTANCE = distance
                 current_back_steering_angle = angle
     
