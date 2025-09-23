@@ -142,7 +142,7 @@ def the_callback(angles, distances):
                 if FRONT_READINGS >= MIN_READINGS_FRONT:
                     FRONT_OBJECT = True # Obstacle detected
 
-            # Get the angle of the closest point (TO TRY)
+            # Get the angle of the closest point (TO TRY) 
 
             # Deduce front direction
             if not FRONT_OBJECT and distance > MAX_DISTANCE:
