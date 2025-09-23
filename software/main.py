@@ -165,12 +165,11 @@ def the_callback(angles, distances):
                 OBSTACLE_DETECTED = False # got back to normal 
 
     # # Update steering
-    # if current_steering_angle is not None:
-    #     steering_degrees = math.degrees(current_steering_angle) if current_steering_angle <= math.pi else math.degrees(current_steering_angle - 2*math.pi)
-    #     TURN_ANGLE = TURN_ANGLE*0.7 + steering_degrees*0.3
-    #set_steering(TURN_ANGLE)
-
-    set_steering(math.degrees(current_steering_angle))
+    if current_steering_angle is not None:
+        steering_degrees = math.degrees(current_steering_angle) if current_steering_angle <= math.pi else math.degrees(current_steering_angle - 2*math.pi)
+        # TURN_ANGLE = TURN_ANGLE*0.7 + steering_degrees*0.3
+        TURN_ANGLE = steering_degrees
+    set_steering(TURN_ANGLE)
 
     # Set speed & simple escape logic
     if CLOSE_OBJECT:
