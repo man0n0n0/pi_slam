@@ -88,8 +88,10 @@ def set_steering(angle: float):
 # ==============================
 # Obstacle Avoidance Parameters
 # ==============================
-SAFE_DISTANCE = 7   # (dm) area in with point are detected as obstacle (value at init)
-MIN_READINGS_FRONT = 30  # Minimum readings in front sector to be valid ([# )Global variables for artifact filtering)
+SAFE_DISTANCE = 5   # (dm) minimal security distance allowed (value at init)
+CLOSE_DISTANCE = 25 # (dm) area in with point are detected as obstacle (value at init)
+MIN_READINGS_FRONT = 30  # Minimum readings in safe sector to be valid ([# )Global variables for artifact filtering)
+MIN_READINGS_CLOSE = 5 # Minimum readings in close sector to be valid ([# )Global variables for artifact filtering)
 K_SPEED = 30 # max speed for exponential function
 K_BACK_SPEED = 30
 STEEPNESS_SPEED = 10 # Smaller steepness (e.g., 5) = faster acceleration, reaches max speed sooner // larger steepness gentler acceleration, more gradual speed increase
@@ -111,7 +113,6 @@ tmpString = ""
 angles = []
 distances = []
 TURN_ANGLE = 0
-CLOSEST_OBSTACLE_ANGLE = None
 ignore_obstacle_until = 0
 t_last_object = 0
 prevLine = None
@@ -126,7 +127,7 @@ def the_callback(angles, distances):
     MAX_DISTANCE = 0
     BACK_MAX_DISTANCE = 0
     FRONT_READINGS = 0
-    FRONT_OBJECT = False
+    CLOSE_OBJECT = False
     current_steering_angle = None
     current_back_steering_angle = None
     front_boundaries = [math.pi/4, 7*math.pi/4]
@@ -137,39 +138,46 @@ def the_callback(angles, distances):
         if (angle <= front_boundaries[0]) or (angle >= front_boundaries[1]):
             # Deduce front obstacle via the cluster size to avoid (artifacts)
             if distance < SAFE_DISTANCE:
-                FRONT_READINGS += 1
-                if FRONT_READINGS >= MIN_READINGS_FRONT:
-                    FRONT_OBJECT = True # Obstacle detected
+                SAFE_READINGS += 1
+                if FRONT_READINGS >= MIN_READINGS_SAFE:
+                    OBSTACLE_DETECTED = True # Obstacle detected
 
-            # Get the angle of the closest point (TO TRY) 
+            # OBSTACLE DETECTED : look  at the close spots
+            if OBSTACLE_DETECTED and distance < CLOSE_DISTANCE:
+                CLOSE_READINGS += 1
+                if CLOSE_READINGS >= MIN_READINGS_CLOSE:
+                    CLOSE_OBJECT = True # Close object detected
 
-            # Deduce front direction
-            if not FRONT_OBJECT and distance > MAX_DISTANCE:
-                MAX_DISTANCE = distance
-                current_steering_angle = angle
-
-        # Backward detection (front range)
-        elif FRONT_OBJECT and (angle <= back_boundaries[1]) or (angle >= back_boundaries[0]):
+        # Backward detection (back range)
+        elif OBSTACLE_DETECTED and (angle <= back_boundaries[1]) or (angle >= back_boundaries[0]):
             # Deduce the backward direction
              if distance > BACK_MAX_DISTANCE:
                 BACK_MAX_DISTANCE = distance
                 current_back_steering_angle = angle
-    
+
+        # No obstacle         
+        if not CLOSE_OBJECT and ((angle <= front_boundaries[0]) or (angle >= front_boundaries[1])):
+            # Get the angle of the farest point 
+            # Deduce front direction
+            if distance > MAX_DISTANCE:
+                MAX_DISTANCE = distance
+                current_steering_angle = angle
+                OBSTACLE_DETECTED = False
+
     # Update steering
-    if not FRONT_OBJECT and current_steering_angle is not None:
+    if not OBSTACLE_DETECTED and current_steering_angle is not None:
         steering_degrees = math.degrees(current_steering_angle) if current_steering_angle <= math.pi else math.degrees(current_steering_angle - 2*math.pi)
         TURN_ANGLE = TURN_ANGLE*0.7 + steering_degrees*0.3
 
-    if FRONT_OBJECT and current_back_steering_angle is not None:
+    if OBSTACLE_DETECTED and current_back_steering_angle is not None:
         steering_degrees = math.degrees(current_back_steering_angle) if current_back_steering_angle <= math.pi else math.degrees(current_back_steering_angle - 2*math.pi)
         TURN_ANGLE = TURN_ANGLE*0.7 + steering_degrees*0.3
     
     set_steering(TURN_ANGLE)
 
     # Set speed & simple escape logic
-    if FRONT_OBJECT:
+    if OBSTACLE_DETECTED:
         set_speed(-K_BACK_SPEED * (1 - math.exp(-BACK_MAX_DISTANCE/STEEPNESS_SPEED))) # Reverse
-
     else:
         set_speed(K_SPEED * (1 - math.exp(-MAX_DISTANCE/STEEPNESS_SPEED)))
 
