@@ -161,7 +161,8 @@ def the_callback(angles, distances):
             # Get the angle of the farest point to get front direction
             if distance > MAX_DISTANCE:
                 MAX_DISTANCE = distance
-                steering_degrees = angle #skip current_steering_angle -> turn directly to the desired angle
+                current_steering_angle = angle 
+                #TODO skip current_steering_angle -> turn directly to the desired angle
                 OBSTACLE_DETECTED = False # got back to normal 
 
     # Update steering
