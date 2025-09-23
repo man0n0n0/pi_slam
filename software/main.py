@@ -126,7 +126,7 @@ def the_callback(angles, distances):
     # Init callback variables
     MAX_DISTANCE = 0
     BACK_MAX_DISTANCE = 0
-    FRONT_READINGS = 0
+    SAFE_READINGS = 0
     CLOSE_OBJECT = False
     current_steering_angle = None
     front_boundaries = [math.pi/4, 7*math.pi/4]
@@ -138,7 +138,7 @@ def the_callback(angles, distances):
             # Deduce front obstacle via the cluster size to avoid artifacts
             if distance < SAFE_DISTANCE:
                 SAFE_READINGS += 1
-                if FRONT_READINGS >= MIN_READINGS_SAFE:
+                if SAFE_READINGS >= MIN_READINGS_SAFE:
                     OBSTACLE_DETECTED = True # Obstacle detected
 
             # IN "OBSTACLE MODE" : monitor close clusters
