@@ -113,7 +113,7 @@ tmpString = ""
 angles = []
 distances = []
 TURN_ANGLE = 0
-ignore_obstacle_until = 0
+OBSTACLE_DETECTED = False
 t_last_object = 0
 prevLine = None
 
@@ -121,7 +121,7 @@ prevLine = None
 # Callback for Processing LiDAR Data
 # ==============================
 def the_callback(angles, distances):
-    global prevLine, TURN_ANGLE, obstacle_start_time, CLOSEST_OBSTACLE_ANGLE
+    global prevLine, TURN_ANGLE, obstacle_start_time, OBSTACLE_DETECTED
     
     # Init callback variables
     MAX_DISTANCE = 0
