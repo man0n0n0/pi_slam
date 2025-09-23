@@ -147,7 +147,6 @@ def the_callback(angles, distances):
                 CLOSE_READINGS += 1
                 if CLOSE_READINGS >= MIN_READINGS_CLOSE:
                     CLOSE_OBJECT = True # Close object detected
-                    break
 
         # Backward detection (back range)
         elif OBSTACLE_DETECTED and (angle <= back_boundaries[1]) or (angle >= back_boundaries[0]):
