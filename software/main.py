@@ -49,7 +49,6 @@ def set_speed(target_speed):
     
     # If changing from forward to reverse, use proper sequence
     if current_direction == 1 and target_direction == -1:
-        print("reversing")
         esc_pwm.ChangeDutyCycle(7.5)  # Stop
         time.sleep(0.5)               # Wait
         esc_pwm.ChangeDutyCycle(5.0)  # Brief brake pulse
@@ -89,8 +88,7 @@ def set_steering(angle: float):
 # ==============================
 # Obstacle Avoidance Parameters
 # ==============================
-SAFE_DISTANCE_INI = 7   # (dm) area in with point are detected as obstacle (value at init)
-DELTA_T_INCREMENTAL_SAFE_DISTANCE = 2 # (sec) time between to obstacle read for incrmeental safe distance
+SAFE_DISTANCE = 7   # (dm) area in with point are detected as obstacle (value at init)
 MIN_READINGS_FRONT = 30  # Minimum readings in front sector to be valid ([# )Global variables for artifact filtering)
 K_SPEED = 30 # max speed for exponential function
 K_BACK_SPEED = 30
@@ -114,7 +112,6 @@ angles = []
 distances = []
 TURN_ANGLE = 0
 CLOSEST_OBSTACLE_ANGLE = None
-SAFE_DISTANCE = SAFE_DISTANCE_INI
 ignore_obstacle_until = 0
 t_last_object = 0
 prevLine = None
@@ -123,7 +120,7 @@ prevLine = None
 # Callback for Processing LiDAR Data
 # ==============================
 def the_callback(angles, distances):
-    global prevLine, TURN_ANGLE, obstacle_start_time, CLOSEST_OBSTACLE_ANGLE, SAFE_DISTANCE, t_last_object
+    global prevLine, TURN_ANGLE, obstacle_start_time, CLOSEST_OBSTACLE_ANGLE
     
     # Init callback variables
     MAX_DISTANCE = 0
@@ -171,13 +168,9 @@ def the_callback(angles, distances):
 
     # Set speed & simple escape logic
     if FRONT_OBJECT:
-        if time.time() > DELTA_T_INCREMENTAL_SAFE_DISTANCE + t_last_object :
-            SAFE_DISTANCE -= 0.1 #as long at it as a front object as much the distance decrease
-        t_last_object = time.time()
         set_speed(-K_BACK_SPEED * (1 - math.exp(-BACK_MAX_DISTANCE/STEEPNESS_SPEED))) # Reverse
 
     else:
-        SAFE_DISTANCE = SAFE_DISTANCE_INI
         set_speed(K_SPEED * (1 - math.exp(-MAX_DISTANCE/STEEPNESS_SPEED)))
 
         
