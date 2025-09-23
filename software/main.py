@@ -174,6 +174,7 @@ def the_callback(angles, distances):
 
     # Set speed & simple escape logic
     if FRONT_OBJECT:
+        print(-K_SPEED * (1 - math.exp(-BACK_MAX_DISTANCE/STEEPNESS_SPEED)))
         set_speed(-K_SPEED * (1 - math.exp(-BACK_MAX_DISTANCE/STEEPNESS_SPEED))) # Reverse
     else:
         set_speed(K_SPEED * (1 - math.exp(-MAX_DISTANCE/STEEPNESS_SPEED)))
