@@ -62,6 +62,7 @@ def set_speed(target_speed):
     
     # If changing from forward to reverse, use proper sequence
     if current_direction == 1 and target_direction == -1:
+        print("reversing")
         esc_pwm.ChangeDutyCycle(7.5)  # Stop
         time.sleep(0.5)               # Wait
         esc_pwm.ChangeDutyCycle(5.0)  # Brief brake pulse
