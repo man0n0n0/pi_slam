@@ -156,7 +156,7 @@ def the_callback(angles, distances):
                 current_steering_angle = angle
 
         # No obstacle         
-        elif not CLOSE_OBJECT and ((angle <= front_boundaries[0]) or (angle >= front_boundaries[1])):
+        if not CLOSE_OBJECT and ((angle <= front_boundaries[0]) or (angle >= front_boundaries[1])):
             # Get the angle of the farest point to get front direction
             if distance > MAX_DISTANCE:
                 MAX_DISTANCE = distance
