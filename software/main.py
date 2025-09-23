@@ -105,7 +105,7 @@ def set_steering(angle: float):
 SAFE_DISTANCE = 10   # (dm) area in with point are detected as obstacle 
 MIN_READINGS_FRONT = 30  # Minimum readings in front sector to be valid ([# )Global variables for artifact filtering)
 K_SPEED = 30 # max speed for exponential function
-K_BACK_SPEED = 15
+K_BACK_SPEED = 30
 STEEPNESS_SPEED = 10 # Smaller steepness (e.g., 5) = faster acceleration, reaches max speed sooner // larger steepness gentler acceleration, more gradual speed increase
 
 IGNORE_DURATION = 2.0 # for backward control
