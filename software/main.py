@@ -89,7 +89,7 @@ def set_steering(angle: float):
 # Obstacle Avoidance Parameters
 # ==============================
 SAFE_DISTANCE = 5   # (dm) minimal security distance allowed (value at init)
-CLOSE_DISTANCE = 10 # (dm) area in with point are detected as obstacle (value at init)
+CLOSE_DISTANCE = 15 # (dm) area in with point are detected as obstacle (value at init)
 MIN_READINGS_SAFE = 30  # Minimum readings in safe sector to be valid ([# )Global variables for artifact filtering)
 MIN_READINGS_CLOSE = 5 # Minimum readings in close sector to be valid ([# )Global variables for artifact filtering)
 K_SPEED = 30 # max speed for exponential function
@@ -147,6 +147,7 @@ def the_callback(angles, distances):
                 CLOSE_READINGS += 1
                 if CLOSE_READINGS >= MIN_READINGS_CLOSE:
                     CLOSE_OBJECT = True # Close object detected
+                    break
 
         # Backward detection (back range)
         elif OBSTACLE_DETECTED and (angle <= back_boundaries[1]) or (angle >= back_boundaries[0]):
