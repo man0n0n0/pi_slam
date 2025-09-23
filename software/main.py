@@ -101,11 +101,10 @@ def set_steering(angle: float):
 # ==============================
 # Obstacle Avoidance Parameters
 # ==============================
-SAFE_DISTANCE = 5   # in dm 
-K_SPEED = 30 # max speed for exponential function
-BACKWARD_SPEED = -20
-STEEPNESS_SPEED = 10 # Smaller steepness (e.g., 5) = faster acceleration, reaches max speed sooner // larger steepness gentler acceleration, more gradual speed increase
+SAFE_DISTANCE = 10   # (dm) area in with point are detected as obstacle 
 MIN_READINGS_FRONT = 30  # Minimum readings in front sector to be valid ([# )Global variables for artifact filtering)
+K_SPEED = 30 # max speed for exponential function
+STEEPNESS_SPEED = 10 # Smaller steepness (e.g., 5) = faster acceleration, reaches max speed sooner // larger steepness gentler acceleration, more gradual speed increase
 
 IGNORE_DURATION = 2.0 # for backward control
 # ==============================
@@ -133,10 +132,9 @@ prevLine = None
 def the_callback(angles, distances):
     global prevLine, TURN_ANGLE, obstacle_start_time, ignore_obstacle_until
     
-    # Your existing obstacle detection code here...
+    # Init callback variables
     MAX_DISTANCE = 0
     BACK_MAX_DISTANCE = 0
-
     FRONT_READINGS = 0
     FRONT_OBJECT = False
     current_steering_angle = None
@@ -171,13 +169,12 @@ def the_callback(angles, distances):
     if FRONT_OBJECT and current_back_steering_angle is not None:
         steering_degrees = math.degrees(current_back_steering_angle) if current_back_steering_angle <= math.pi else math.degrees(current_back_steering_angle - 2*math.pi)
         TURN_ANGLE = TURN_ANGLE*0.7 + steering_degrees*0.3
-
+    
     set_steering(TURN_ANGLE)
 
-    # Simple escape logic
+    # Set speed & simple escape logic
     if FRONT_OBJECT:
         set_speed(-K_SPEED * (1 - math.exp(-BACK_MAX_DISTANCE/STEEPNESS_SPEED))) # Reverse
-
     else:
         set_speed(K_SPEED * (1 - math.exp(-MAX_DISTANCE/STEEPNESS_SPEED)))
 
