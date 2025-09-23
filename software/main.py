@@ -142,7 +142,7 @@ def the_callback(angles, distances):
     current_steering_angle = None
     current_back_steering_angle = None
     front_boundaries = [math.pi/4, 7*math.pi/4]
-    back_boundaries = [3math.pi/4, 5*math.pi/4]
+    back_boundaries = [3*math.pi/4, 5*math.pi/4]
 
     for angle, distance in zip(angles, distances):
         if (angle <= front_boundaries[0]) or (angle >= front_boundaries[1]):
