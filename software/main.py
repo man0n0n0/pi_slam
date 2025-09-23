@@ -170,7 +170,7 @@ def the_callback(angles, distances):
     #     TURN_ANGLE = TURN_ANGLE*0.7 + steering_degrees*0.3
     #set_steering(TURN_ANGLE)
 
-    set_steering(math.degre(steering_degrees))
+    set_steering(math.degrees(current_steering_angle))
 
     # Set speed & simple escape logic
     if CLOSE_OBJECT:
